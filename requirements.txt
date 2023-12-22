@@ -1,0 +1,16 @@
+asgiref==3.7.2
+black==24.1a1
+build==1.0.3
+click==8.1.7
+colorama==0.4.6
+Django==5.0
+mypy-extensions==1.0.0
+packaging==23.2
+pathspec==0.12.1
+pip-tools==7.3.0
+platformdirs==4.1.0
+pyproject_hooks==1.0.0
+setuptools==69.0.2
+sqlparse==0.4.4
+tzdata==2023.3
+wheel==0.42.0

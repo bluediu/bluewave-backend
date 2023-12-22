@@ -27,12 +27,16 @@ SECRET_KEY = env["core"]["secret_key"]
 # MODELS
 
 INSTALLED_APPS = [
+    "apps.users",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "drf_spectacular",
+    "drf_spectacular_sidecar",
+    "rest_framework",
     "corsheaders",
 ]
 
@@ -178,7 +182,7 @@ REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
         "rest_framework_simplejwt.authentication.JWTAuthentication",
     ),
-    "EXCEPTION_HANDLER": "common.api.custom_exception_handler",
+    # "EXCEPTION_HANDLER": "common.api.custom_exception_handler",
     "DATETIME_INPUT_FORMATS": ["%Y-%m-%dT%I:%M:%S %p", "iso-8601"],
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
 }
@@ -186,10 +190,10 @@ REST_FRAMEWORK = {
 # DJANGO SPECTACULAR
 
 SPECTACULAR_SETTINGS = {
-    "TITLE": "Depocard API",
+    "TITLE": "BlueWave API",
     "DESCRIPTION": (
         "BlueWave API endpoints specification.<br><br>"
-        "Base URL: https://192.168.10.20/ <br><br>"
+        "Base URL: https://1.1.1.1/ <br><br>"
         "**Error responses** <br>"
         "All error responses will return a JSON object with the single key `errors` "
         "containing relevant information describing the problem. When possible, "
@@ -217,7 +221,7 @@ SPECTACULAR_SETTINGS = {
     "SORT_OPERATIONS": False,
     "ENUM_ADD_EXPLICIT_BLANK_NULL_CHOICE": False,
     "TAGS": [
-        {"name": "Users", "description": "users actions endpoints."},
+        {"name": "Users", "description": "Users actions endpoints."},
     ],
 }
 

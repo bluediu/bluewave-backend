@@ -1,0 +1,12 @@
+[flake8]
+exclude =
+    .git,
+    .idea,
+    .vscode,
+    __pycache__,
+    migrations
+max-line-length = 88
+select =
+    E123,
+    W503,
+    F401
