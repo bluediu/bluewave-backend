@@ -28,6 +28,7 @@ SECRET_KEY = env["core"]["secret_key"]
 
 INSTALLED_APPS = [
     "apps.users",
+    "apps.api",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -202,7 +203,6 @@ SPECTACULAR_SETTINGS = {
     ),
     "VERSION": "1.0.0",
     "SERVE_INCLUDE_SCHEMA": False,
-    "SERVE_PERMISSIONS": ["common.permissions.IsAdminUser"],
     "GROUPING": "TAG",
     "REDOC_UI_SETTINGS": {
         "hideDownloadButton": True,
@@ -214,7 +214,7 @@ SPECTACULAR_SETTINGS = {
                 "fontWeightBold": 700,
             },
             "sidebar": {"backgroundColor": "#f8f9fa"},
-            "rightPanel": {"backgroundColor": "#485f6a", "width": "30%"},
+            "rightPanel": {"backgroundColor": "#2c3e50", "width": "30%"},
         },
     },
     "REDOC_DIST": "SIDECAR",
