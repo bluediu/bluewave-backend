@@ -1,5 +1,6 @@
 import tomllib
 from pathlib import Path
+from datetime import timedelta
 
 # ----------------------------------------------------------------------
 # 0. SETUP
@@ -38,6 +39,7 @@ INSTALLED_APPS = [
     "drf_spectacular",
     "drf_spectacular_sidecar",
     "rest_framework",
+    "rest_framework_simplejwt",
     "corsheaders",
 ]
 
@@ -179,13 +181,23 @@ STATIC_URL = "static/"
 # ----------------------------------------------------------------------
 
 # DJANGO REST FRAMEWORK
+
+# noinspection PyUnresolvedReferences
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
         "rest_framework_simplejwt.authentication.JWTAuthentication",
     ),
-    # "EXCEPTION_HANDLER": "common.api.custom_exception_handler",
+    "EXCEPTION_HANDLER": "common.api.api_exception_http",
     "DATETIME_INPUT_FORMATS": ["%Y-%m-%dT%I:%M:%S %p", "iso-8601"],
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+}
+
+# API JWT
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(hours=9),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
+    "ALGORITHM": "HS256",
+    "SIGNING_KEY": SECRET_KEY,
 }
 
 # DJANGO SPECTACULAR
@@ -221,6 +233,7 @@ SPECTACULAR_SETTINGS = {
     "SORT_OPERATIONS": False,
     "ENUM_ADD_EXPLICIT_BLANK_NULL_CHOICE": False,
     "TAGS": [
+        {"name": "Auth", "description": "Authentication actions endpoints."},
         {"name": "Users", "description": "Users actions endpoints."},
     ],
 }
