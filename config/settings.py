@@ -1,5 +1,6 @@
 import tomllib
 from pathlib import Path
+from datetime import timedelta
 
 # ----------------------------------------------------------------------
 # 0. SETUP
@@ -28,6 +29,7 @@ SECRET_KEY = env["core"]["secret_key"]
 
 INSTALLED_APPS = [
     "apps.users",
+    "apps.api",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -37,6 +39,7 @@ INSTALLED_APPS = [
     "drf_spectacular",
     "drf_spectacular_sidecar",
     "rest_framework",
+    "rest_framework_simplejwt",
     "corsheaders",
 ]
 
@@ -178,13 +181,23 @@ STATIC_URL = "static/"
 # ----------------------------------------------------------------------
 
 # DJANGO REST FRAMEWORK
+
+# noinspection PyUnresolvedReferences
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
         "rest_framework_simplejwt.authentication.JWTAuthentication",
     ),
-    # "EXCEPTION_HANDLER": "common.api.custom_exception_handler",
+    "EXCEPTION_HANDLER": "common.api.api_exception_http",
     "DATETIME_INPUT_FORMATS": ["%Y-%m-%dT%I:%M:%S %p", "iso-8601"],
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+}
+
+# API JWT
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(hours=9),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
+    "ALGORITHM": "HS256",
+    "SIGNING_KEY": SECRET_KEY,
 }
 
 # DJANGO SPECTACULAR
@@ -202,7 +215,6 @@ SPECTACULAR_SETTINGS = {
     ),
     "VERSION": "1.0.0",
     "SERVE_INCLUDE_SCHEMA": False,
-    "SERVE_PERMISSIONS": ["common.permissions.IsAdminUser"],
     "GROUPING": "TAG",
     "REDOC_UI_SETTINGS": {
         "hideDownloadButton": True,
@@ -214,13 +226,14 @@ SPECTACULAR_SETTINGS = {
                 "fontWeightBold": 700,
             },
             "sidebar": {"backgroundColor": "#f8f9fa"},
-            "rightPanel": {"backgroundColor": "#485f6a", "width": "30%"},
+            "rightPanel": {"backgroundColor": "#2c3e50", "width": "30%"},
         },
     },
     "REDOC_DIST": "SIDECAR",
     "SORT_OPERATIONS": False,
     "ENUM_ADD_EXPLICIT_BLANK_NULL_CHOICE": False,
     "TAGS": [
+        {"name": "Auth", "description": "Authentication actions endpoints."},
         {"name": "Users", "description": "Users actions endpoints."},
     ],
 }

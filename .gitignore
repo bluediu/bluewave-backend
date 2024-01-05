@@ -2,3 +2,6 @@
 env.toml
 .idea
 .vscode
+.python-version
+db.sqlite3
+command.md
