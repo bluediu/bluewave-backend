@@ -29,6 +29,7 @@ SECRET_KEY = env["core"]["secret_key"]
 
 INSTALLED_APPS = [
     "apps.users",
+    "apps.products",
     "apps.api",
     "django.contrib.admin",
     "django.contrib.auth",
