@@ -1,3 +1,4 @@
+import os
 import tomllib
 from pathlib import Path
 from datetime import timedelta
@@ -113,7 +114,7 @@ USE_TZ = True
 
 MEDIA_URL = "/uploads/"
 
-MEDIA_ROOT = env["file_uploads"]["media_root"]
+MEDIA_ROOT = os.path.join(BASE_DIR, env["file_uploads"]["media_root"])
 
 # LOGGING
 
@@ -142,6 +143,10 @@ LOGGING = {
         "django": {
             "handlers": [],
             "level": "INFO",
+        },
+        "django.db.backends": {
+            "handlers": ["console"],
+            "level": "DEBUG",  # TODO: remove on prod.
         },
     },
     "root": {
@@ -195,8 +200,8 @@ REST_FRAMEWORK = {
 
 # API JWT
 SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(hours=9),
-    "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
+    "ACCESS_TOKEN_LIFETIME": timedelta(days=3),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=3),
     "ALGORITHM": "HS256",
     "SIGNING_KEY": SECRET_KEY,
 }
@@ -236,6 +241,8 @@ SPECTACULAR_SETTINGS = {
     "TAGS": [
         {"name": "Auth", "description": "Authentication actions endpoints."},
         {"name": "Users", "description": "Users actions endpoints."},
+        {"name": "Products", "description": "Products actions endpoints."},
+        {"name": "Categories", "description": "Categories actions endpoints."},
     ],
 }
 

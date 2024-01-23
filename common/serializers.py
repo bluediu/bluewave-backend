@@ -22,3 +22,14 @@ class Serializer(serializers.Serializer):
     def check_data(self) -> None:
         """Check data validity and raise an exception if not."""
         self.is_valid(raise_exception=True)
+
+
+def inline_serializer(
+    *,
+    name: str,
+    base: type[Serializer] = Serializer,
+    fields: dict,
+    **kwargs,
+):
+    """Return a nested inlined serializer."""
+    return type(name, (base,), fields)(**kwargs)

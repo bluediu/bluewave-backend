@@ -5,3 +5,4 @@ env.toml
 .python-version
 db.sqlite3
 command.md
+uploads/*

@@ -1,4 +1,3 @@
-from django.db.models.fields import Field
 from django.db import models
 
 
