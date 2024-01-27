@@ -1,9 +1,20 @@
+from pathlib import Path
+
+from django.utils.crypto import get_random_string
+from django.utils.timezone import now
 from django.db import models
 from django.core.validators import FileExtensionValidator, MinValueValidator
 
 from apps.products.models.category import Category
 from common.models import BaseModel
-from common.functions import image_file_path
+
+
+# noinspection PyUnusedLocal
+def _image_file_path(instance, filename) -> str:
+    """Return a standard image path format."""
+    ext = Path(filename).suffix
+    filename = f"{now().strftime('%Y%m%d%H%M%S')}_{get_random_string(4)}{ext}"
+    return f"products/{filename}"
 
 
 class Product(BaseModel):
@@ -28,15 +39,14 @@ class Product(BaseModel):
     )
     image = models.ImageField(
         verbose_name="Image",
-        upload_to=image_file_path,
+        upload_to=_image_file_path,
         unique=True,
         validators=[FileExtensionValidator(["png", "jpg", "jpeg", "svg"])],
     )
     category = models.ForeignKey(
         Category,
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
+        related_name="products",
+        on_delete=models.PROTECT,
     )
 
     class Meta(BaseModel.Meta):

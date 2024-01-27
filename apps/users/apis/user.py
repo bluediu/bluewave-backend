@@ -2,7 +2,7 @@ from functools import partial
 
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from rest_framework.status import HTTP_200_OK
+from rest_framework.status import HTTP_200_OK, HTTP_201_CREATED
 from drf_spectacular.utils import OpenApiParameter, OpenApiResponse, extend_schema
 
 from apps.users.serializers import user as srz
@@ -65,7 +65,7 @@ def create_user(request) -> Response:
     payload.check_data()
     data = payload.validated_data
     user = sv.create_user(request_user=request.user, **data)
-    return Response(data={"user_id": user.id}, status=HTTP_200_OK)
+    return Response(data={"user_id": user.id}, status=HTTP_201_CREATED)
 
 
 @_user_api_schema(

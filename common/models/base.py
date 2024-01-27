@@ -7,25 +7,25 @@ class BaseModel(models.Model):
     """Base model for project apps models."""
 
     created_at = models.DateTimeField(
-        verbose_name="Creado",
+        verbose_name="Created",
         editable=False,
     )
     created_by = models.ForeignKey(
         "users.User",
         on_delete=models.PROTECT,
-        verbose_name="Creado por",
+        verbose_name="Created by",
         related_name="%(app_label)s_%(class)s_created_by",
         related_query_name="%(app_label)s_%(class)s_created_by",
         editable=False,
     )
     updated_at = models.DateTimeField(
-        verbose_name="Actualizado",
+        verbose_name="Updated",
         editable=False,
     )
     updated_by = models.ForeignKey(
         "users.User",
         on_delete=models.PROTECT,
-        verbose_name="Actualizado por",
+        verbose_name="Updated by",
         related_name="%(app_label)s_%(class)s_updated_by",
         related_query_name="%(app_label)s_%(class)s_updated_by",
         editable=False,
