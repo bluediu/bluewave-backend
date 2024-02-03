@@ -243,6 +243,16 @@ SPECTACULAR_SETTINGS = {
         {"name": "Users", "description": "Users actions endpoints."},
         {"name": "Products", "description": "Products actions endpoints."},
         {"name": "Categories", "description": "Categories actions endpoints."},
+        {
+            "name": "Forms",
+            "description": (
+                "Endpoints for application form schemas. <br><br>"
+                "These endpoints return JSON object containing essential frontend "
+                "<i><b>form keys</b></i> such as "
+                "<code>name</code>, <code>value</code>, "
+                "<code>validations</code> properties."
+            ),
+        },
     ],
 }
 
