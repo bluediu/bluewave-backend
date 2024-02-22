@@ -200,8 +200,8 @@ REST_FRAMEWORK = {
 
 # API JWT
 SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(days=3),
-    "REFRESH_TOKEN_LIFETIME": timedelta(days=3),
+    "ACCESS_TOKEN_LIFETIME": timedelta(days=1),
+    "REFRESH_TOKEN_LIFETIME": timedelta(hours=5),
     "ALGORITHM": "HS256",
     "SIGNING_KEY": SECRET_KEY,
 }
