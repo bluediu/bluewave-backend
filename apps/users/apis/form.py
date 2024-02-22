@@ -1,6 +1,6 @@
 from functools import partial
 
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, authentication_classes
 from rest_framework.response import Response
 from rest_framework.status import HTTP_200_OK
 from drf_spectacular.utils import OpenApiResponse, extend_schema
@@ -18,6 +18,7 @@ _user_form_api_schema = partial(extend_schema, tags=["Forms"])
         description="Auth form successfully retrieved.",
     ),
 )
+@authentication_classes(None)
 @api_view(["GET"])
 def get_auth_form(request) -> Response:
     """Return an auth form schema."""

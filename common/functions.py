@@ -12,6 +12,7 @@ def form_to_api_schema(*, form: fields_for_model) -> dict:
     fields_data = []
 
     for name, field in form.fields_from_model.items():
+        print(field.__dict__)
         type_mapping = {
             forms.TextInput: "text",
             forms.EmailField: "email",
@@ -43,7 +44,7 @@ def form_to_api_schema(*, form: fields_for_model) -> dict:
                 {"value": choice[0], "label": choice[1]}
                 for choice in getattr(field, "choices", [])
             ],
-            "value": field.initial,
+            "value": field.empty_value,
         }
         fields_data.append(field_info)
 
