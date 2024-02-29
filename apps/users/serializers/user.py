@@ -8,11 +8,22 @@ class UserInfoSerializer(Serializer):
 
     id = srz.IntegerField(help_text="User ID.")
     username = srz.CharField(help_text="Username.")
-    first_name = srz.CharField(help_text="First name.")
-    last_name = srz.CharField(help_text="Last name.")
-    email = srz.EmailField(help_text="Email.")
+    first_name = srz.CharField(
+        help_text="First name.",
+        required=False,
+    )
+    last_name = srz.CharField(
+        help_text="Last name.",
+        required=False,
+    )
+    email = srz.EmailField(
+        help_text="E-mail address.",
+        required=False,
+    )
     is_active = srz.BooleanField(help_text="Is the user active?.")
     is_staff = srz.BooleanField(help_text="Is the user staff?.")
+    created_at = srz.DateTimeField(help_text="Created at time.")
+    updated_at = srz.DateTimeField(help_text="Updated at time.")
 
 
 class UserCreateSerializer(Serializer):
