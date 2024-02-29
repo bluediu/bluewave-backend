@@ -1,3 +1,6 @@
+from enum import Enum
+from typing import Literal
+
 from django.core.exceptions import ValidationError
 from django.contrib.auth.hashers import make_password
 from django.db.models import QuerySet
@@ -19,9 +22,20 @@ def get_user(user_id: int) -> User:
     return get_object_or_404(User, id=user_id)
 
 
-def get_users() -> QuerySet[User]:
+class FilterOpt(Enum):
+    """Filter options for users."""
+
+    ACTIVES = "actives"
+    INACTIVES = "inactives"
+
+
+def get_users(
+    *,
+    user: User,
+    filter_by: Literal["all", "actives", "inactives"] = "all",
+) -> QuerySet[User]:
     """Return the users."""
-    fields = [
+    users = User.objects.values(
         "id",
         "username",
         "first_name",
@@ -29,10 +43,20 @@ def get_users() -> QuerySet[User]:
         "email",
         "is_active",
         "is_staff",
-    ]
-    return (
-        User.objects.filter(is_superuser=False).values(*fields).order_by("-date_joined")
+        "created_at",
+        "updated_at",
     )
+
+    # Only a superuser can see another superusers.
+    if not user.is_superuser:
+        users = users.filter(is_superuser=False)
+
+    if filter_by == FilterOpt.ACTIVES.value:
+        users = users.filter(is_active=True)
+    elif filter_by == FilterOpt.INACTIVES.value:
+        users = users.filter(is_active=False)
+
+    return users.order_by("id")
 
 
 def create_user(*, request_user: User, **fields: dict) -> User:
@@ -48,8 +72,8 @@ def create_user(*, request_user: User, **fields: dict) -> User:
 
 def update_user(*, user: User, request_user: User, **fields: dict) -> None:
     """Update a user."""
-    if user.is_superuser:
-        raise ValidationError("Forbidden action!")
+    if not (request_user.is_superuser and user.is_superuser):
+        raise ValidationError("Only a superuser can update another superuser.")
     changed_fields = user.updated_fields(**fields)
     user.updated_by = request_user
     user.full_clean()

@@ -146,7 +146,7 @@ LOGGING = {
         },
         "django.db.backends": {
             "handlers": ["console"],
-            "level": "DEBUG",  # TODO: remove on prod.
+            # "level": "DEBUG",  # TODO: remove on prod.
         },
     },
     "root": {

@@ -1,5 +1,8 @@
 from functools import partial
+from typing import Literal
 
+from django.http import QueryDict
+from django.core.validators import ValidationError
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.status import HTTP_200_OK, HTTP_201_CREATED
@@ -10,12 +13,25 @@ from apps.users.services import user as sv
 from common.api import id_response_spec, empty_response_spec
 from common.decorators import permission_required
 
+
 _user_api_schema = partial(extend_schema, tags=["Users"])
 _user_id_params = OpenApiParameter(
     name="user_id",
     description="User ID.",
     location=OpenApiParameter.PATH,
 )
+
+VALID_FILTERS = ("all", "actives", "inactives")
+
+
+def _process_user_query_params(
+    query_params: QueryDict,
+) -> Literal["all", "actives", "inactives"]:
+    """Return validated user filter param."""
+    filter_by = query_params.get("filter_by", "all")
+    if filter_by not in VALID_FILTERS:
+        raise ValidationError({"filter_by": "invalid choice."})
+    return filter_by
 
 
 # noinspection PyUnusedLocal
@@ -48,7 +64,14 @@ def get_user(request, user_id: int) -> Response:
 @permission_required("users.view_user")
 def get_users(request) -> Response:
     """Return a list users."""
-    output = srz.UserInfoSerializer(sv.get_users(), many=True)
+    filter_by = _process_user_query_params(request.query_params)
+    output = srz.UserInfoSerializer(
+        sv.get_users(
+            user=request.user,
+            filter_by=filter_by,
+        ),
+        many=True,
+    )
     return Response(data=output.data, status=HTTP_200_OK)
 
 
@@ -75,7 +98,7 @@ def create_user(request) -> Response:
     responses=empty_response_spec("User successfully updated."),
 )
 @api_view(["PUT"])
-@permission_required("users.create_user")
+@permission_required("users.change_user")
 def update_user(request, user_id: int) -> Response:
     """Update a user."""
     payload = srz.UserUpdateSerializer(data=request.data)
