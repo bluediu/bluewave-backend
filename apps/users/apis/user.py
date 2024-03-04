@@ -1,8 +1,5 @@
 from functools import partial
-from typing import Literal
 
-from django.http import QueryDict
-from django.core.validators import ValidationError
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.status import HTTP_200_OK, HTTP_201_CREATED
@@ -12,6 +9,8 @@ from apps.users.serializers import user as srz
 from apps.users.services import user as sv
 from common.api import id_response_spec, empty_response_spec
 from common.decorators import permission_required
+from common import functions as fn
+from common.api import filter_parameter_spec
 
 
 _user_api_schema = partial(extend_schema, tags=["Users"])
@@ -19,19 +18,8 @@ _user_id_params = OpenApiParameter(
     name="user_id",
     description="User ID.",
     location=OpenApiParameter.PATH,
+    type=int,
 )
-
-VALID_FILTERS = ("all", "actives", "inactives")
-
-
-def _process_user_query_params(
-    query_params: QueryDict,
-) -> Literal["all", "actives", "inactives"]:
-    """Return validated user filter param."""
-    filter_by = query_params.get("filter_by", "all")
-    if filter_by not in VALID_FILTERS:
-        raise ValidationError({"filter_by": "invalid choice."})
-    return filter_by
 
 
 # noinspection PyUnusedLocal
@@ -55,6 +43,7 @@ def get_user(request, user_id: int) -> Response:
 # noinspection PyUnusedLocal
 @_user_api_schema(
     summary="List users",
+    parameters=[filter_parameter_spec(scope="users")],
     responses=OpenApiResponse(
         response=srz.UserInfoSerializer(many=True),
         description="List of users successfully retrieved.",
@@ -64,7 +53,7 @@ def get_user(request, user_id: int) -> Response:
 @permission_required("users.view_user")
 def get_users(request) -> Response:
     """Return a list users."""
-    filter_by = _process_user_query_params(request.query_params)
+    filter_by = fn.validate_filter_query_param(request.query_params)
     output = srz.UserInfoSerializer(
         sv.get_users(
             user=request.user,
@@ -81,7 +70,7 @@ def get_users(request) -> Response:
     responses=id_response_spec("User", "User successfully created."),
 )
 @api_view(["POST"])
-@permission_required("users.create_user")
+@permission_required("users.add_user")
 def create_user(request) -> Response:
     """Create a new user"""
     payload = srz.UserCreateSerializer(data=request.data)

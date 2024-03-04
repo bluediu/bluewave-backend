@@ -72,7 +72,7 @@ def create_user(*, request_user: User, **fields: dict) -> User:
 
 def update_user(*, user: User, request_user: User, **fields: dict) -> None:
     """Update a user."""
-    if not (request_user.is_superuser and user.is_superuser):
+    if not request_user.is_superuser and user.is_superuser:
         raise ValidationError("Only a superuser can update another superuser.")
     changed_fields = user.updated_fields(**fields)
     user.updated_by = request_user

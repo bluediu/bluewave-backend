@@ -1,5 +1,9 @@
+from typing import Literal
+
 from django import forms
+from django.http import QueryDict
 from django.forms import fields_for_model
+from django.core.validators import ValidationError
 
 
 def clean_spaces(content: str) -> str:
@@ -12,10 +16,9 @@ def form_to_api_schema(*, form: fields_for_model) -> dict:
     fields_data = []
 
     for name, field in form.fields_from_model.items():
-        print(field.__dict__)
         type_mapping = {
             forms.TextInput: "text",
-            forms.EmailField: "email",
+            forms.EmailInput: "email",
             forms.PasswordInput: "password",
             forms.BooleanField: "checkbox",
             forms.Select: "select",
@@ -41,11 +44,32 @@ def form_to_api_schema(*, form: fields_for_model) -> dict:
                 }
             ],
             "choices": [
-                {"value": choice[0], "label": choice[1]}
-                for choice in getattr(field, "choices", [])
+                {
+                    "key": str(choice[0]).lower(),
+                    "value": choice[0],
+                    "text": choice[1],
+                }
+                for choice in getattr(field.widget, "choices", [])
             ],
-            "value": field.empty_value,
+            "value": (
+                field.initial
+                if field.initial
+                else getattr(field, "empty_value", field.initial)
+            ),
         }
         fields_data.append(field_info)
 
     return {"fields": fields_data}
+
+
+VALID_FILTERS = ("all", "actives", "inactives")
+
+
+def validate_filter_query_param(
+    query_params: QueryDict,
+) -> Literal["all", "actives", "inactives"]:
+    """Return validated query filter param."""
+    filter_by = query_params.get("filter_by", "all")
+    if filter_by not in VALID_FILTERS:
+        raise ValidationError({"filter_by": "invalid choice."})
+    return filter_by
