@@ -2,7 +2,7 @@ from django.core import exceptions
 from django.http import Http404, HttpResponse
 from django.db.models import IntegerField
 from django.utils.crypto import get_random_string
-from drf_spectacular.utils import OpenApiResponse, inline_serializer
+from drf_spectacular.utils import OpenApiResponse, inline_serializer, OpenApiParameter
 
 from rest_framework.exceptions import NotFound, PermissionDenied, ValidationError
 from rest_framework.serializers import as_serializer_error
@@ -37,6 +37,14 @@ def empty_response_spec(description: str) -> OpenApiResponse:
         description = f"{description}."
     description = f"{description} No response body."
     return OpenApiResponse(None, description=description)
+
+
+def filter_parameter_spec(*, scope: str) -> OpenApiParameter:
+    """Return an Open Api parameter specification."""
+    return OpenApiParameter(
+        "filter_by",
+        description=f"Filter {scope} by `all`, `actives`, or `inactives`.",
+    )
 
 
 def id_response_spec(
