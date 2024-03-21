@@ -8,6 +8,7 @@ from drf_spectacular.utils import OpenApiResponse, extend_schema
 from apps.products.serializers import category as srz
 from apps.products.services import category as sv
 from common.decorators import permission_required
+from common import functions as fn
 
 _category_api_schema = partial(extend_schema, tags=["Categories"])
 
@@ -42,7 +43,11 @@ def get_category(request, category_id: int) -> Response:
 @permission_required("products.list_category")
 def list_categories(request) -> Response:
     """Return a list of categories."""
-    output = srz.CategoryInfoSerializer(sv.list_categories(), many=True)
+    filter_by = fn.validate_filter_query_param(request.query_params)
+    output = srz.CategoryInfoSerializer(
+        sv.list_categories(filter_by=filter_by),
+        many=True,
+    )
     return Response(data=output.data, status=HTTP_200_OK)
 
 

@@ -1,3 +1,5 @@
+from typing import Literal
+
 from django.db import transaction
 from django.shortcuts import get_object_or_404
 from django.db.models import QuerySet
@@ -12,10 +14,18 @@ def get_category(category_id: int) -> Category:
     return get_object_or_404(Category, id=category_id)
 
 
-def list_categories() -> QuerySet[Category]:
+def list_categories(
+    *, filter_by: Literal["all", "actives", "inactives"]
+) -> QuerySet[Category]:
     """Return a list of categories."""
-    categories = Category.objects.order_by("id")
-    return categories
+    categories = Category.objects
+
+    if filter_by == "actives":
+        categories = categories.filter(is_active=True)
+    elif filter_by == "inactives":
+        categories = categories.filter(is_active=False)
+
+    return categories.order_by("id")
 
 
 def create_category(*, user: User, **fields: dict) -> Category:

@@ -22,17 +22,10 @@ def get_user(user_id: int) -> User:
     return get_object_or_404(User, id=user_id)
 
 
-class FilterOpt(Enum):
-    """Filter options for users."""
-
-    ACTIVES = "actives"
-    INACTIVES = "inactives"
-
-
 def get_users(
     *,
     user: User,
-    filter_by: Literal["all", "actives", "inactives"] = "all",
+    filter_by: Literal["all", "actives", "inactives"],
 ) -> QuerySet[User]:
     """Return the users."""
     users = User.objects.values(
@@ -51,9 +44,9 @@ def get_users(
     if not user.is_superuser:
         users = users.filter(is_superuser=False)
 
-    if filter_by == FilterOpt.ACTIVES.value:
+    if filter_by == "actives":
         users = users.filter(is_active=True)
-    elif filter_by == FilterOpt.INACTIVES.value:
+    elif filter_by == "inactives":
         users = users.filter(is_active=False)
 
     return users.order_by("id")
