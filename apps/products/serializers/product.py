@@ -2,6 +2,7 @@ from django.core.validators import MinValueValidator, FileExtensionValidator
 from rest_framework import serializers as srz
 
 from apps.products.serializers.category import CategoryInfoSerializer
+from apps.products.types import IMAGE_EXTENSION
 from common.serializers import Serializer
 
 
@@ -53,7 +54,7 @@ class ProductCreateSerializer(Serializer):
     )
     image = srz.ImageField(
         help_text="Product image.",
-        validators=[FileExtensionValidator(["png", "jpg", "jpeg", "svg"])],
+        validators=[FileExtensionValidator(IMAGE_EXTENSION)],
     )
     category = srz.IntegerField(
         help_text="Category ID.",
