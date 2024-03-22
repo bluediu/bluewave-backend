@@ -15,6 +15,24 @@ def form_to_api_schema(*, form: fields_for_model) -> dict:
     """Convert a form schema to a JSON schema."""
     fields_data = []
 
+    def set_field_value(*, field_value: fields_for_model):
+        """
+        Set the value for a field.
+
+        When the field is a file, a default value will be used.
+        If the field has an initial value, it will be returned.
+        Otherwise, the empty value for the field will be returned.
+        """
+        is_file = isinstance(field.widget, forms.ClearableFileInput)
+        has_initial_value = field_value.initial is not None
+
+        if is_file and has_initial_value:
+            return f"/uploads/{field_value.initial}"
+        elif has_initial_value:
+            return field_value.initial
+        else:
+            return getattr(field_value, "empty_value", "")
+
     for name, field in form.fields_from_model.items():
         type_mapping = {
             forms.TextInput: "text",
@@ -23,6 +41,7 @@ def form_to_api_schema(*, form: fields_for_model) -> dict:
             forms.BooleanField: "checkbox",
             forms.Select: "select",
             forms.Textarea: "textarea",
+            forms.ClearableFileInput: "file",
         }
 
         widget_type = type_mapping.get(field.widget.__class__, "unknown")
@@ -51,11 +70,7 @@ def form_to_api_schema(*, form: fields_for_model) -> dict:
                 }
                 for choice in getattr(field.widget, "choices", [])
             ],
-            "value": (
-                field.initial
-                if field.initial
-                else getattr(field, "empty_value", field.initial)
-            ),
+            "value": set_field_value(field_value=field),
         }
         fields_data.append(field_info)
 

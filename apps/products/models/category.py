@@ -35,6 +35,10 @@ class Category(BaseModel):
         upload_to=_image_file_path,
         unique=True,
         validators=[FileExtensionValidator(IMAGE_EXTENSION)],
+        help_text=(
+            f"Images must have one of the following extensions: "
+            f"{", ".join(IMAGE_EXTENSION)}",
+        ),
     )
 
     class Meta(BaseModel.Meta):

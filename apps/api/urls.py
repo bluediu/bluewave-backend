@@ -5,6 +5,7 @@ from apps.users.urls import urlpatterns as users_api
 from apps.products.urls.product import api_patterns as product
 from apps.products.urls.category import api_patterns as category
 from apps.users.urls.form import users_form_patterns as users_form
+from apps.products.urls.form import products_form_patterns as products_form
 
 from apps.api.views import APISchemaView, APISpecsView
 
@@ -14,6 +15,7 @@ app_name = "api"
 # <entity>_api = [path(".../", include((..., app_name), namespace=""))]
 forms_api = [
     path("user/", include((users_form, app_name), namespace="user")),
+    path("product/", include((products_form, app_name), namespace="product")),
 ]
 
 products_api = [
@@ -34,5 +36,3 @@ urlpatterns = [
         ),
     ),
 ]
-
-# -> localhost:5000/api/forms/user/login
