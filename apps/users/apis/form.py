@@ -36,7 +36,7 @@ def get_auth_form(request) -> Response:
 
 # noinspection PyUnusedLocal
 @_user_form_api_schema(
-    summary="[Users] create user form",
+    summary="[User] create form",
     responses=OpenApiResponse(
         description="Create user form successfully retrieved.",
     ),
@@ -51,7 +51,7 @@ def get_create_user_form(request) -> Response:
 
 # noinspection PyUnusedLocal
 @_user_form_api_schema(
-    summary="[Users] update user form",
+    summary="[User] update form",
     responses=OpenApiResponse(
         description="Update user form successfully retrieved.",
     ),

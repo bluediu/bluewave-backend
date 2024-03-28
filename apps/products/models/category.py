@@ -7,6 +7,7 @@ from django.core.validators import FileExtensionValidator
 
 from common.models import BaseModel
 from common.functions import clean_spaces
+from apps.products.types import IMAGE_EXTENSION
 
 
 # noinspection PyUnusedLocal
@@ -33,7 +34,11 @@ class Category(BaseModel):
         verbose_name="Image",
         upload_to=_image_file_path,
         unique=True,
-        validators=[FileExtensionValidator(["png", "jpg", "jpeg", "svg"])],
+        validators=[FileExtensionValidator(IMAGE_EXTENSION)],
+        help_text=(
+            f"Images must have one of the following extensions: "
+            f"{", ".join(IMAGE_EXTENSION)}",
+        ),
     )
 
     class Meta(BaseModel.Meta):

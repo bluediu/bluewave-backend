@@ -6,6 +6,7 @@ from django.db import models
 from django.core.validators import FileExtensionValidator, MinValueValidator
 
 from apps.products.models.category import Category
+from apps.products.types import IMAGE_EXTENSION
 from common.models import BaseModel
 
 
@@ -41,7 +42,7 @@ class Product(BaseModel):
         verbose_name="Image",
         upload_to=_image_file_path,
         unique=True,
-        validators=[FileExtensionValidator(["png", "jpg", "jpeg", "svg"])],
+        validators=[FileExtensionValidator(IMAGE_EXTENSION)],
     )
     category = models.ForeignKey(
         Category,
