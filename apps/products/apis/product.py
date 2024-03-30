@@ -9,6 +9,8 @@ from apps.products.services import product as sv
 from apps.products.serializers import product as srz
 from apps.products.services.category import get_category
 from common.decorators import permission_required
+from common import functions as fn
+
 
 _product_api_schema = partial(extend_schema, tags=["Products"])
 
@@ -42,7 +44,13 @@ def get_product(request, product_id: int) -> Response:
 @permission_required("product.list_product")
 def list_products(request) -> Response:
     """Return a list of products."""
-    output = srz.ProductInfoSerializer(sv.list_products(), many=True)
+    filter_by = fn.validate_filter_query_param(request.query_params)
+    output = srz.ProductInfoSerializer(
+        sv.list_products(
+            filter_by=filter_by,
+        ),
+        many=True,
+    )
     return Response(data=output.data, status=HTTP_200_OK)
 
 
