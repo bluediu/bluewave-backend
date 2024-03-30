@@ -1,3 +1,5 @@
+from typing import Literal
+
 from django.db import transaction
 from django.shortcuts import get_object_or_404
 from django.db.models import QuerySet
@@ -12,10 +14,19 @@ def get_product(product_id: int) -> Product:
     return get_object_or_404(Product, id=product_id)
 
 
-def list_products() -> QuerySet[Product]:
+def list_products(
+    *,
+    filter_by: Literal["all", "actives", "inactives"],
+) -> QuerySet[Product]:
     """Return a list of products."""
-    products = Product.objects.select_related("category").order_by("id")
-    return products
+    products = Product.objects.select_related("category")
+
+    if filter_by == "actives":
+        products = products.filter(is_active=True)
+    elif filter_by == "inactives":
+        products = products.filter(is_active=False)
+
+    return products.order_by("id")
 
 
 def create_product(*, user: User, **fields: dict) -> Product:
