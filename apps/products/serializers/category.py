@@ -18,6 +18,8 @@ class CategoryInfoSerializer(Serializer):
     image = srz.ImageField(
         help_text="Category image.",
     )
+    created_at = srz.DateTimeField(help_text="Created at time.")
+    updated_at = srz.DateTimeField(help_text="Updated at time.")
 
 
 class CategoryCreateSerializer(Serializer):

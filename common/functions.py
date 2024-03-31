@@ -11,6 +11,14 @@ def clean_spaces(content: str) -> str:
     return " ".join(content.split())
 
 
+def cents_to_dollar(*, cents: int) -> str | None:
+    """Convert cents to dollars."""
+    if cents is not None:
+        dollar = cents / 100.0
+        return f"{dollar:0.2f}"
+    return None
+
+
 def form_to_api_schema(*, form: fields_for_model) -> dict:
     """Convert a form schema to a JSON schema."""
     fields_data = []
@@ -42,6 +50,7 @@ def form_to_api_schema(*, form: fields_for_model) -> dict:
             forms.Select: "select",
             forms.Textarea: "textarea",
             forms.ClearableFileInput: "file",
+            forms.NumberInput: "number",
         }
 
         widget_type = type_mapping.get(field.widget.__class__, "unknown")
@@ -65,7 +74,7 @@ def form_to_api_schema(*, form: fields_for_model) -> dict:
             "choices": [
                 {
                     "key": str(choice[0]).lower(),
-                    "value": choice[0],
+                    "value": str(choice[0]).lower(),
                     "text": choice[1],
                 }
                 for choice in getattr(field.widget, "choices", [])

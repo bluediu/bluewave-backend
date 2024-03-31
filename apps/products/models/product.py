@@ -3,11 +3,16 @@ from pathlib import Path
 from django.utils.crypto import get_random_string
 from django.utils.timezone import now
 from django.db import models
-from django.core.validators import FileExtensionValidator, MinValueValidator
+from django.core.validators import (
+    FileExtensionValidator,
+    MinValueValidator,
+    MaxValueValidator,
+)
 
 from apps.products.models.category import Category
 from apps.products.types import IMAGE_EXTENSION
 from common.models import BaseModel
+from common.functions import cents_to_dollar
 
 
 # noinspection PyUnusedLocal
@@ -16,6 +21,10 @@ def _image_file_path(instance, filename) -> str:
     ext = Path(filename).suffix
     filename = f"{now().strftime('%Y%m%d%H%M%S')}_{get_random_string(4)}{ext}"
     return f"products/{filename}"
+
+
+MAX_PRICE = 10000  # $100 usd
+MIN_PRICE = 100  # $1.00 usd
 
 
 class Product(BaseModel):
@@ -32,7 +41,13 @@ class Product(BaseModel):
     )
     price = models.IntegerField(
         verbose_name="Price",
-        validators=[MinValueValidator(1)],
+        validators=[MinValueValidator(MIN_PRICE), MaxValueValidator(MAX_PRICE)],
+        help_text=(
+            f"The price of the product must be between"
+            f" ${cents_to_dollar(cents=MIN_PRICE)} "
+            f"USD and "
+            f"${cents_to_dollar(cents=MAX_PRICE)} USD."
+        ),
     )
     is_active = models.BooleanField(
         verbose_name="Active",
@@ -62,7 +77,7 @@ class Product(BaseModel):
         constraints = [
             models.CheckConstraint(
                 name="%(app_label)s_%(class)s_price_check",
-                check=models.Q(price__gte=1),
+                check=models.Q(price__gte=MIN_PRICE),
             ),
             models.CheckConstraint(
                 name="%(app_label)s_%(class)s_name_not_empty_check",
