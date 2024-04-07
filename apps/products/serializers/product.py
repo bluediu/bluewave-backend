@@ -1,14 +1,22 @@
-from django.core.validators import MinValueValidator, FileExtensionValidator
+from django.core.validators import (
+    MinValueValidator,
+    MaxValueValidator,
+    FileExtensionValidator,
+)
 from rest_framework import serializers as srz
 
 from apps.products.serializers.category import CategoryInfoSerializer
 from apps.products.types import IMAGE_EXTENSION
+from apps.products.models import MIN_PRICE, MAX_PRICE
 from common.serializers import Serializer
 
 
 class ProductInfoSerializer(Serializer):
     """A product info output serializer."""
 
+    id = srz.IntegerField(
+        help_text="Product ID",
+    )
     name = srz.CharField(
         help_text="Product name.",
     )
@@ -27,6 +35,8 @@ class ProductInfoSerializer(Serializer):
     category = CategoryInfoSerializer(
         help_text="Product category information.",
     )
+    created_at = srz.DateTimeField(help_text="Created at time.")
+    updated_at = srz.DateTimeField(help_text="Updated at time.")
 
 
 class ProductCreateSerializer(Serializer):
@@ -46,7 +56,7 @@ class ProductCreateSerializer(Serializer):
             "Price in whole dollar cents. Only integer values are accepted;"
             " any decimal values will be ignored."
         ),
-        validators=[MinValueValidator(1000)],
+        validators=[MinValueValidator(MIN_PRICE), MaxValueValidator(MAX_PRICE)],
     )
     is_active = srz.BooleanField(
         help_text="Is product active?",
