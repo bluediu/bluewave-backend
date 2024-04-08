@@ -47,5 +47,5 @@ def update_product(*, product: Product, user: User, **fields: dict) -> Product:
                 if default_storage.exists(existing_image):
                     default_storage.delete(existing_image)
             product.full_clean()
-            product.save(user.id)
+            product.save(user.id, update_fields=changed_fields)
         return product
