@@ -4,6 +4,7 @@ from django.urls import include, path
 from apps.users.urls import urlpatterns as users_api
 from apps.products.urls.product import api_patterns as product
 from apps.products.urls.category import api_patterns as category
+from apps.tables.urls.table import api_patterns as table
 from apps.users.urls.form import users_form_patterns as users_form
 from apps.products.urls.form import products_form_patterns as products_form
 
@@ -23,11 +24,16 @@ products_api = [
     path("category/", include((category, app_name), namespace="category")),
 ]
 
+tables_api = [
+    path("table/", include((table, app_name), namespace="table")),
+]
+
 urlpatterns = [
     path("schema/", APISchemaView.as_view(), name="schema"),
     path("specs/", APISpecsView.as_view(), name="specs"),
     path("users/", include((users_api, app_name), namespace="users")),
     path("products/", include((products_api, app_name), namespace="products")),
+    path("tables/", include((tables_api, app_name), namespace="tables")),
     path(
         "forms/",
         include(
