@@ -7,6 +7,7 @@ from apps.products.urls.category import api_patterns as category
 from apps.tables.urls.table import api_patterns as table
 from apps.users.urls.form import users_form_patterns as users_form
 from apps.products.urls.form import products_form_patterns as products_form
+from apps.tables.urls.form import tables_form_patterns as tables_form
 
 from apps.api.views import APISchemaView, APISpecsView
 
@@ -17,6 +18,7 @@ app_name = "api"
 forms_api = [
     path("user/", include((users_form, app_name), namespace="user")),
     path("product/", include((products_form, app_name), namespace="product")),
+    path("table/", include((tables_form, app_name), namespace="table")),
 ]
 
 products_api = [

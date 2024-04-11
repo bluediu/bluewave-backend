@@ -1,6 +1,6 @@
 from rest_framework import serializers as srz
 
-from apps.tables.models.table import CODE_LENGTH
+from apps.tables.models import CODE_LENGTH
 from common.serializers import Serializer
 
 
