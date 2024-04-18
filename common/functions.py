@@ -1,3 +1,5 @@
+import random
+import string
 from typing import Literal
 
 from django import forms
@@ -35,7 +37,7 @@ def form_to_api_schema(*, form: fields_for_model) -> dict:
         has_initial_value = field_value.initial is not None
 
         if is_file and has_initial_value:
-            return f"/uploads/{field_value.initial}"
+            return f"uploads/{field_value.initial}"
         elif has_initial_value:
             return field_value.initial
         else:
@@ -97,3 +99,9 @@ def validate_filter_query_param(
     if filter_by not in VALID_FILTERS:
         raise ValidationError({"filter_by": "invalid choice."})
     return filter_by
+
+
+def generate_random_code(length=6) -> str:
+    """Return a random code."""
+    characters = string.ascii_letters + string.digits
+    return "".join(random.choice(characters) for _ in range(length))

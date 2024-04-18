@@ -4,6 +4,7 @@ import apps.tables.apis.table as api
 
 api_patterns = [
     path("list/", api.list_tables, name="list"),
+    path("list/order_statuses/", api.list_table_order_statuses, name="order_statuses"),
     path("create/", api.create_table, name="create"),
     path(
         "<int:table_id>/",

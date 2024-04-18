@@ -32,6 +32,7 @@ INSTALLED_APPS = [
     "apps.users",
     "apps.products",
     "apps.tables",
+    "apps.transactions",
     "apps.api",
     "django.contrib.admin",
     "django.contrib.auth",
@@ -245,6 +246,7 @@ SPECTACULAR_SETTINGS = {
         {"name": "Products", "description": "Products actions endpoints."},
         {"name": "Categories", "description": "Categories actions endpoints."},
         {"name": "Tables", "description": "Tables actions endpoints."},
+        {"name": "Orders", "description": "Order actions endpoints."},
         {
             "name": "Forms",
             "description": (

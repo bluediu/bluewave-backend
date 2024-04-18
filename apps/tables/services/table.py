@@ -1,9 +1,19 @@
 from typing import Literal
 
 from django.shortcuts import get_object_or_404
-from django.db.models import QuerySet
+from django.db.models import (
+    Q,
+    Case,
+    When,
+    Count,
+    Exists,
+    OuterRef,
+    QuerySet,
+    BooleanField,
+)
 
 from apps.tables.models import Table
+from apps.transactions.models import OrderStatus, Order
 from apps.users.models import User
 
 
@@ -25,6 +35,40 @@ def list_tables(
         tables = tables.filter(is_active=False)
 
     return tables.order_by("id")
+
+
+def list_table_order_statuses() -> dict:
+    """
+    Return a list of table order statuses.
+
+    Counts the orders for each table and checks if any orders
+    have been delivered, indicating that the table is busy.
+    """
+    tables = (
+        Table.objects.values("id", "code")
+        .annotate(
+            orders_number=Count(
+                "orders",
+                filter=Q(orders__status=OrderStatus.PENDING),
+            ),
+            all_orders_delivered=Case(
+                When(
+                    orders__gt=0,
+                    then=~Exists(
+                        Order.objects.filter(table_id=OuterRef("id")).exclude(
+                            status=OrderStatus.DELIVERED,
+                        )
+                    ),
+                ),
+                default=False,
+                output_field=BooleanField(),
+            ),
+        )
+        .filter(is_active=True)
+        .order_by("code")
+    )
+
+    return tables
 
 
 def create_table(*, user: User, **fields: dict) -> Table:

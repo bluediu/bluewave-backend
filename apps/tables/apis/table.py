@@ -35,7 +35,7 @@ def get_table(request, table_id: int) -> Response:
 @_table_api_schema(
     summary="List tables",
     responses=OpenApiResponse(
-        response=srz.TableCreateSerializer(many=True),
+        response=srz.TableInfoSerializer(many=True),
         description="Tables successfully retrieved.",
     ),
 )
@@ -46,6 +46,25 @@ def list_tables(request) -> Response:
     filter_by = fn.validate_filter_query_param(request.query_params)
     output = srz.TableInfoSerializer(
         sv.list_tables(filter_by=filter_by),
+        many=True,
+    )
+    return Response(data=output.data, status=HTTP_200_OK)
+
+
+# noinspection PyUnusedLocal
+@_table_api_schema(
+    summary="List table order statuses",
+    responses=OpenApiResponse(
+        response=srz.TableOrderStatusSerializer(many=True),
+        description="Table order statuses successfully retrieved.",
+    ),
+)
+@api_view(["GET"])
+@permission_required("tables.list_table")
+def list_table_order_statuses(request) -> Response:
+    """Return a list of table order statuses."""
+    output = srz.TableOrderStatusSerializer(
+        sv.list_table_order_statuses(),
         many=True,
     )
     return Response(data=output.data, status=HTTP_200_OK)
