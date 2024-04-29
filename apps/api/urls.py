@@ -1,10 +1,14 @@
 from django.urls import include, path
 
 
+# Apps urls
 from apps.users.urls import urlpatterns as users_api
 from apps.products.urls.product import api_patterns as product
 from apps.products.urls.category import api_patterns as category
 from apps.tables.urls.table import api_patterns as table
+from apps.transactions.urls.order import api_patterns as order
+
+# Forms urls
 from apps.users.urls.form import users_form_patterns as users_form
 from apps.products.urls.form import products_form_patterns as products_form
 from apps.tables.urls.form import tables_form_patterns as tables_form
@@ -30,12 +34,18 @@ tables_api = [
     path("table/", include((table, app_name), namespace="table")),
 ]
 
+orders_api = [
+    path("order/", include((order, app_name), namespace="order")),
+]
+
+
 urlpatterns = [
     path("schema/", APISchemaView.as_view(), name="schema"),
     path("specs/", APISpecsView.as_view(), name="specs"),
     path("users/", include((users_api, app_name), namespace="users")),
     path("products/", include((products_api, app_name), namespace="products")),
     path("tables/", include((tables_api, app_name), namespace="tables")),
+    path("orders/", include((orders_api, app_name), namespace="orders")),
     path(
         "forms/",
         include(

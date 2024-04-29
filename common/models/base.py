@@ -48,7 +48,15 @@ class BaseModel(models.Model):
     ):
         """Customize to set audit fields before saving."""
         current_timestamp = now()
-        if self.pk is None:
+
+        """
+        Check if the default primary key (pk) setter provided by Django exists. 
+        If it doesn't, it means that either no primary key is specified or 
+        another field is specified as the primary key.
+        """
+        default_pk = getattr(self, "id", None)
+
+        if self.pk is None or default_pk is None:
             self.created_at = current_timestamp
             self.created_by_id = user_id
         self.updated_at = current_timestamp

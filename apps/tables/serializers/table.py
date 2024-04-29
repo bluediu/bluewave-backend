@@ -16,6 +16,25 @@ class TableInfoSerializer(Serializer):
     is_active = srz.BooleanField(
         help_text="Is table active?",
     )
+    created_at = srz.DateTimeField(help_text="Created at time.")
+    updated_at = srz.DateTimeField(help_text="Updated at time.")
+
+
+class TableOrderStatusSerializer(Serializer):
+    """A table order status output serializer."""
+
+    id = srz.IntegerField(
+        help_text="Table ID",
+    )
+    code = srz.CharField(
+        help_text="Code",
+    )
+    orders_number = srz.IntegerField(
+        help_text="Number of orders by table.",
+    )
+    all_orders_delivered = srz.BooleanField(
+        help_text="Have all the orders for a table been delivered?"
+    )
 
 
 class TableCreateSerializer(Serializer):
