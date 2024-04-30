@@ -22,6 +22,11 @@ def get_table(table_id: int) -> Table:
     return get_object_or_404(Table, id=table_id)
 
 
+def get_table_by_code(table_code: str) -> Table:
+    """Return a table."""
+    return get_object_or_404(Table, code=table_code)
+
+
 def list_tables(
     *,
     filter_by: Literal["all", "actives", "inactives"],
@@ -56,7 +61,7 @@ def list_table_order_statuses() -> dict:
                     orders__gt=0,
                     then=~Exists(
                         Order.objects.filter(table_id=OuterRef("id")).exclude(
-                            status=OrderStatus.DELIVERED,
+                            status__in=[OrderStatus.DELIVERED, OrderStatus.CANCELED]
                         )
                     ),
                 ),

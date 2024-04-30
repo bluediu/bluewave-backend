@@ -85,3 +85,7 @@ class Product(BaseModel):
                 violation_error_message="Name can't be empty.",
             ),
         ]
+
+    def __str__(self) -> str:
+        """Return instance name."""
+        return self.name

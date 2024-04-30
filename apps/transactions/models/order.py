@@ -92,3 +92,18 @@ class Order(BaseModel):
                 violation_error_message="Invalid status.",
             ),
         ]
+
+    @property
+    def is_pending(self):
+        """Return True if the order is pending."""
+        return self.status == OrderStatus.PENDING
+
+    @property
+    def is_delivered(self):
+        """Return True if the order is delivered"""
+        return self.status == OrderStatus.DELIVERED
+
+    @property
+    def is_canceled(self):
+        """Return True if the order is canceled."""
+        return self.status == OrderStatus.CANCELED

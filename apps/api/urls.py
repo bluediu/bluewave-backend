@@ -12,6 +12,7 @@ from apps.transactions.urls.order import api_patterns as order
 from apps.users.urls.form import users_form_patterns as users_form
 from apps.products.urls.form import products_form_patterns as products_form
 from apps.tables.urls.form import tables_form_patterns as tables_form
+from apps.transactions.urls.form import orders_form_patterns as orders_form
 
 from apps.api.views import APISchemaView, APISpecsView
 
@@ -23,6 +24,7 @@ forms_api = [
     path("user/", include((users_form, app_name), namespace="user")),
     path("product/", include((products_form, app_name), namespace="product")),
     path("table/", include((tables_form, app_name), namespace="table")),
+    path("order/", include((orders_form, app_name), namespace="order")),
 ]
 
 products_api = [
