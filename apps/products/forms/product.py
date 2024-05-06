@@ -43,7 +43,7 @@ class ProductCreateForm(forms.Form):
         self.fields_from_model["price"].min_length = MIN_PRICE // 100
 
 
-class ProductUpdateForm(ProductCreateForm):
+class ProductUpdateForm(forms.Form):
     """A update product form schema."""
 
     fields_from_model = forms.fields_for_model(
@@ -70,3 +70,5 @@ class ProductUpdateForm(ProductCreateForm):
                 self.fields_from_model[field_name].initial = value
 
         self.fields_from_model["category"].widget.choices = get_category_choices()
+        self.fields_from_model["price"].max_length = MAX_PRICE // 100
+        self.fields_from_model["price"].min_length = MIN_PRICE // 100

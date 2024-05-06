@@ -1,1 +1,1 @@
-from .table import TableCreateForm, TableUpdateForm
+from .table import TableCreateForm, TableUpdateForm  # noqa

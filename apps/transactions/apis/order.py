@@ -11,7 +11,7 @@ from drf_spectacular.utils import OpenApiResponse, OpenApiParameter, extend_sche
 from apps.transactions.models import OrderStatus
 from apps.transactions.services import order as sv
 from apps.transactions.serializers import order as srz
-from apps.tables.services.table import get_table
+from apps.tables.services.table import get_table_by_code
 from apps.products.services.product import get_product
 
 from common.api import empty_response_spec
@@ -68,6 +68,23 @@ def process_order_query_params(query_params: QueryDict) -> _OrderSearchT:
 
 # noinspection PyUnusedLocal
 @_order_api_schema(
+    summary="Get order state",
+    responses=OpenApiResponse(
+        response=srz.OrderStateInfoSerializer,
+        description="Order state successfully retrieved.",
+    ),
+)
+@api_view(["GET"])
+@permission_required("tables.get_order")
+def get_order_state(request, table_code: str) -> Response:
+    """Get order state information."""
+    data = sv.get_order_state(table_code)
+    output = srz.OrderStateInfoSerializer(data)
+    return Response(data=output.data, status=HTTP_200_OK)
+
+
+# noinspection PyUnusedLocal
+@_order_api_schema(
     summary="Search orders",
     parameters=order_search_params_specs,
     responses=OpenApiResponse(
@@ -104,9 +121,9 @@ def list_order_products(request, table_code: str) -> Response:
 
 
 @_order_api_schema(
-    summary="Create order",
+    summary="Register order",
     request=srz.OrderCreateSerializer,
-    responses=empty_response_spec("Order successfully created."),
+    responses=empty_response_spec("Order successfully registered."),
 )
 @api_view(["POST"])
 @permission_required("transactions.create_order")
@@ -115,31 +132,42 @@ def register_order(request) -> Response:
     payload = srz.OrderCreateSerializer(data=request.data)
     payload.check_data()
     data = payload.validated_data
-    data["table"] = get_table(table_id=data["table"])
+    data["table"] = get_table_by_code(table_code=data["table"])
     data["product"] = get_product(product_id=data["product"])
     sv.create_order(user=request.user, fields=data)
     return Response(status=HTTP_201_CREATED)
 
 
-# @_table_api_schema(
-#     summary="Update table",
-#     request=srz.TableUpdateSerializer,
-#     responses=OpenApiResponse(
-#         response=srz.TableInfoSerializer,
-#         description="Table successfully updated.",
-#     ),
-# )
-# @api_view(["PUT"])
-# @permission_required("tables.change_table")
-# def update_table(request, table_id: int) -> Response:
-#     """Update a table."""
-#     payload = srz.TableUpdateSerializer(data=request.data)
-#     payload.check_data()
-#     data = payload.validated_data
-#     table = sv.update_table(
-#         table=sv.get_table(table_id),
-#         user=request.user,
-#         **data,
-#     )
-#     output = srz.TableUpdateSerializer(table)
-#     return Response(data=output.data, status=HTTP_200_OK)
+@_order_api_schema(
+    summary="Update order",
+    request=srz.OrderUpdateSerializer,
+    responses=empty_response_spec("Order successfully updated."),
+)
+@api_view(["PUT"])
+@permission_required("transactions.change_order")
+def update_order(request, order_code: str) -> Response:
+    """
+    Update an order.
+
+    This endpoint allows updating the `quantity` of ordered products
+    and the `status` of the order.
+
+    **Constrains & consideration:**
+
+    - **Canceled order:** The status of a canceled orders should remain unchanged.
+    - **Canceled order & quantity:** If the order is canceled, it raises a validation
+    error to prevent any further updates to the quantity,
+    as canceled orders should remain unchanged.
+    - **Delivered order:** Quantity updates are limited to prevent decreases.
+        If the quantity is increased, the order status shifts to "Pending" to
+        reflect additional products awaiting delivery.
+    """
+    payload = srz.OrderUpdateSerializer(data=request.data)
+    payload.check_data()
+    data = payload.validated_data
+    sv.update_order(
+        order=sv.get_order(order_code),
+        user=request.user,
+        **data,
+    )
+    return Response(status=HTTP_200_OK)

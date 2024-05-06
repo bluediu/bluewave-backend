@@ -110,5 +110,5 @@ def update_table(request, table_id: int) -> Response:
         user=request.user,
         **data,
     )
-    output = srz.TableUpdateSerializer(table)
+    output = srz.TableInfoSerializer(table)
     return Response(data=output.data, status=HTTP_200_OK)

@@ -1,6 +1,6 @@
 from django import forms
 
-from apps.tables.models import Table, CODE_LENGTH
+from apps.tables.models import Table
 from common.form import is_active_field
 
 
