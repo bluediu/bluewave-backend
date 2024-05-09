@@ -214,7 +214,7 @@ SPECTACULAR_SETTINGS = {
     "TITLE": "BlueWave API",
     "DESCRIPTION": (
         "BlueWave API endpoints specification.<br><br>"
-        "Base URL: https://1.1.1.1/ <br><br>"
+        "Base URL: http://127.0.0.1:8000/ <br><br>"
         "**Error responses** <br>"
         "All error responses will return a JSON object with the single key `errors` "
         "containing relevant information describing the problem. When possible, "
@@ -247,6 +247,7 @@ SPECTACULAR_SETTINGS = {
         {"name": "Categories", "description": "Categories actions endpoints."},
         {"name": "Tables", "description": "Tables actions endpoints."},
         {"name": "Orders", "description": "Order actions endpoints."},
+        {"name": "Payments", "description": "Payment actions endpoints."},
         {
             "name": "Forms",
             "description": (

@@ -82,7 +82,7 @@ class OrderStateInfoSerializer(Serializer):
     )
 
 
-class OrderCreateSerializer(Serializer):
+class OrderRegisterSerializer(Serializer):
     """An order register input serializer."""
 
     table = srz.CharField(

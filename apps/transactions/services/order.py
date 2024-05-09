@@ -1,19 +1,28 @@
 from typing import TypedDict, Required, NotRequired
 
-from django.shortcuts import get_object_or_404
-from django.db.models import CharField, QuerySet, F, Case, When, Value, Q, Sum, Count
+from django.utils.timezone import now
 from django.db.models.functions import Concat
+from django.shortcuts import get_object_or_404
 from django.core.validators import ValidationError
+from django.db.models import CharField, QuerySet, F, Case, When, Value, Q, Sum, Count
 
-from apps.transactions.models import Order, OrderStatus, MAX_QUANTITY, MIN_QUANTITY
+
 from apps.users.models import User
-from apps.products.models import Product
 from apps.tables.models import Table
+from apps.products.models import Product
+from apps.transactions.models import (
+    Order,
+    OrderStatus,
+    MAX_QUANTITY,
+    MIN_QUANTITY,
+)
+
+from apps.transactions.services.payment import pending_payment_exists
 from common.functions import generate_random_code
 
 
-class _OrderCreateT(TypedDict):
-    """An order create type."""
+class _OrderRegisterT(TypedDict):
+    """An order register type."""
 
     table: Required[Table]
     product: Required[Product]
@@ -27,8 +36,8 @@ class _OrderUpdateT(TypedDict):
     quantity: NotRequired[int]
 
 
-def _validate_order_context(user: User, fields: _OrderCreateT) -> None:
-    """Validate a order context consistency."""
+def _validate_order_context(user: User, fields: _OrderRegisterT) -> None:
+    """Validate an order context consistency."""
     inactive_msg = "Must be active."
     if not user.is_active:
         raise ValidationError({"user": inactive_msg})
@@ -41,13 +50,17 @@ def _validate_order_context(user: User, fields: _OrderCreateT) -> None:
     if not table.is_active:
         raise ValidationError({"table": inactive_msg})
 
-    if table.orders.filter(product=product).exists():
+    if table.orders.filter(product=product, is_close=False).exists():
         raise ValidationError(
             {"table": "Product already exists in an order for this table."}
         )
 
+    if pending_payment_exists(table=table):
+        msg = "Forbidden action! You cannot create new order."
+        raise ValidationError({"table": msg})
+
     if fields.get("quantity") and fields["quantity"] <= 0:
-        raise ValidationError({"quantity": _("Must be greater than zero.")})
+        raise ValidationError({"quantity": "Must be greater than zero."})
 
 
 def get_order(order_code: str) -> Order:
@@ -58,7 +71,7 @@ def get_order(order_code: str) -> Order:
 def get_order_state(table_code: str) -> dict:
     """Get order state info."""
     info = Order.objects.filter(
-        Q(table__code=table_code) & ~Q(status=OrderStatus.CANCELED)
+        Q(table__code=table_code) & Q(is_close=False) & ~Q(status=OrderStatus.CANCELED)
     ).aggregate(
         total_price=Sum(F("product__price") * F("quantity")),
         count_pending=Count("code", filter=Q(status=OrderStatus.PENDING)),
@@ -72,7 +85,10 @@ def list_order_products(table_code: str) -> list[Order]:
     """Return a list of products for a table order."""
 
     order_products = (
-        Order.objects.filter(table__code=table_code)
+        Order.objects.filter(
+            table__code=table_code,
+            is_close=False,
+        )
         .select_related("product", "product__category")
         .annotate(
             status_label=Case(
@@ -116,8 +132,8 @@ def search_orders(
     return orders.order_by("-created_at")
 
 
-def create_order(*, user: User, fields: _OrderCreateT) -> None:
-    """Create an order."""
+def register_order(*, user: User, fields: _OrderRegisterT) -> None:
+    """Register an order."""
     _validate_order_context(user, fields)
 
     order = Order(code=generate_random_code(), **fields)
@@ -126,10 +142,15 @@ def create_order(*, user: User, fields: _OrderCreateT) -> None:
 
 
 def update_order(*, order: Order, user: User, **fields: _OrderUpdateT) -> Order:
-    """Update a order."""
+    """Update an order."""
     previous_qty = order.quantity
     previous_status = order.status
     changed_fields = order.update_fields(**fields)
+
+    # Check payment integrity.
+    if pending_payment_exists(table=order.table):
+        msg = "This order can't be updated because it has a pending payment registered."
+        raise ValidationError({"order": msg})
 
     if "status" in changed_fields and previous_status == OrderStatus.CANCELED:
         raise ValidationError({"status": "Cannot update status of a canceled order."})
@@ -154,3 +175,24 @@ def update_order(*, order: Order, user: User, **fields: _OrderUpdateT) -> Order:
         order.full_clean()
         order.save(user.id, update_fields=changed_fields)
     return order
+
+
+def close_orders_bulk(*, user: User, table: Table) -> None:
+    """Close an orders."""
+    orders = table.orders
+
+    all_orders_canceled = (
+        not orders.filter(is_close=False).exclude(status=OrderStatus.CANCELED).exists()
+    )
+
+    if not all_orders_canceled:
+        raise ValidationError(
+            {"table": "All order must be canceled to perform this operation."}
+        )
+
+    # Close associated table orders.
+    orders.update(
+        is_close=True,
+        updated_at=now(),
+        updated_by_id=user.id,
+    )
