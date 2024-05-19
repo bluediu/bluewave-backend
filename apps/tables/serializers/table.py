@@ -35,6 +35,12 @@ class TableOrderStatusSerializer(Serializer):
     all_orders_delivered = srz.BooleanField(
         help_text="Have all the orders for a table been delivered?"
     )
+    all_orders_canceled = srz.BooleanField(
+        help_text="Have all the orders for a table been canceled?"
+    )
+    pending_payment = srz.BooleanField(
+        help_text="Indicates if a table has a pending payment.,"
+    )
 
 
 class TableCreateSerializer(Serializer):

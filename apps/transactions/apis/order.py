@@ -122,19 +122,19 @@ def list_order_products(request, table_code: str) -> Response:
 
 @_order_api_schema(
     summary="Register order",
-    request=srz.OrderCreateSerializer,
+    request=srz.OrderRegisterSerializer,
     responses=empty_response_spec("Order successfully registered."),
 )
 @api_view(["POST"])
 @permission_required("transactions.create_order")
 def register_order(request) -> Response:
     """Register a new order/transaction."""
-    payload = srz.OrderCreateSerializer(data=request.data)
+    payload = srz.OrderRegisterSerializer(data=request.data)
     payload.check_data()
     data = payload.validated_data
     data["table"] = get_table_by_code(table_code=data["table"])
     data["product"] = get_product(product_id=data["product"])
-    sv.create_order(user=request.user, fields=data)
+    sv.register_order(user=request.user, fields=data)
     return Response(status=HTTP_201_CREATED)
 
 
@@ -170,4 +170,22 @@ def update_order(request, order_code: str) -> Response:
         user=request.user,
         **data,
     )
+    return Response(status=HTTP_200_OK)
+
+
+@_order_api_schema(
+    summary="Close all orders",
+    responses=empty_response_spec("Orders successfully closed."),
+)
+@api_view(["PUT"])
+@permission_required("transactions.change_order")
+def close_orders(request, table_code: str) -> Response:
+    """
+    Close all orders.
+
+    NOTE: This action is only available for tables that have all their orders
+    `canceled` for some reason.
+    """
+    table = get_table_by_code(table_code=table_code)
+    sv.close_orders_bulk(user=request.user, table=table)
     return Response(status=HTTP_200_OK)

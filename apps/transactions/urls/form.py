@@ -8,4 +8,5 @@ orders_form_patterns = [
         api.get_register_order_form,
         name="register",
     ),
+    path("register_payment/", api.get_register_payment_form, name="register_payment"),
 ]

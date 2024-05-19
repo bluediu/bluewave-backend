@@ -13,7 +13,7 @@ from django.db.models import (
 )
 
 from apps.tables.models import Table
-from apps.transactions.models import OrderStatus, Order
+from apps.transactions.models import OrderStatus, Order, Payment, PaymentStatus
 from apps.users.models import User
 
 
@@ -54,19 +54,51 @@ def list_table_order_statuses() -> dict:
         .annotate(
             orders_number=Count(
                 "orders",
-                filter=Q(orders__status=OrderStatus.PENDING),
+                filter=Q(
+                    orders__status=OrderStatus.PENDING,
+                    orders__is_close=False,
+                ),
             ),
             all_orders_delivered=Case(
                 When(
-                    orders__gt=0,
-                    then=~Exists(
-                        Order.objects.filter(table_id=OuterRef("id")).exclude(
-                            status__in=[OrderStatus.DELIVERED, OrderStatus.CANCELED]
+                    orders_number=0,
+                    then=Exists(
+                        Order.objects.filter(
+                            table_id=OuterRef("id"),
+                            status=OrderStatus.DELIVERED,
+                            is_close=False,
                         )
                     ),
                 ),
                 default=False,
                 output_field=BooleanField(),
+            ),
+            all_orders_canceled=Case(
+                When(
+                    # Check if there are any non-closed orders for the table.
+                    Exists(
+                        Order.objects.filter(
+                            table_id=OuterRef("id"),
+                            is_close=False,
+                        )
+                    ),
+                    # If there are non-closed orders, check if all of them are canceled.
+                    then=~Exists(
+                        Order.objects.filter(
+                            table_id=OuterRef("id"),
+                            is_close=False,
+                        ).exclude(status=OrderStatus.CANCELED)
+                    ),
+                ),
+                # If there are no non-closed orders, set to False.
+                default=False,
+                output_field=BooleanField(),
+            ),
+            pending_payment=Exists(
+                Payment.objects.filter(
+                    table_id=OuterRef("id"),
+                    status=PaymentStatus.PENDING,
+                )
             ),
         )
         .filter(is_active=True)

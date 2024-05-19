@@ -7,6 +7,7 @@ from apps.products.urls.product import api_patterns as product
 from apps.products.urls.category import api_patterns as category
 from apps.tables.urls.table import api_patterns as table
 from apps.transactions.urls.order import api_patterns as order
+from apps.transactions.urls.payment import api_patterns as payment
 
 # Forms urls
 from apps.users.urls.form import users_form_patterns as users_form
@@ -40,6 +41,10 @@ orders_api = [
     path("order/", include((order, app_name), namespace="order")),
 ]
 
+payments_api = [
+    path("payment/", include((payment, app_name), namespace="payment")),
+]
+
 
 urlpatterns = [
     path("schema/", APISchemaView.as_view(), name="schema"),
@@ -48,6 +53,7 @@ urlpatterns = [
     path("products/", include((products_api, app_name), namespace="products")),
     path("tables/", include((tables_api, app_name), namespace="tables")),
     path("orders/", include((orders_api, app_name), namespace="orders")),
+    path("payments/", include((payments_api, app_name), namespace="payments")),
     path(
         "forms/",
         include(

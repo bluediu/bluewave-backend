@@ -20,6 +20,7 @@ api_patterns = [
             [
                 path("state/", api.get_order_state, name="state"),
                 path("products/", api.list_order_products, name="list"),
+                path("close_bulk/", api.close_orders, name="close"),
             ]
         ),
     ),

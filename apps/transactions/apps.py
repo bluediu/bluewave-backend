@@ -2,8 +2,8 @@ from django.apps import AppConfig
 
 
 class TransactionsConfig(AppConfig):
-    """Orders application config."""
+    """Transactions application config."""
 
     default_auto_field = "django.db.models.BigAutoField"
     name = "apps.transactions"
-    verbose_name = "Orders"
+    verbose_name = "Transactions"

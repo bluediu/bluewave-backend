@@ -8,7 +8,10 @@ from apps.products.models import Product
 def get_products_choices(table_code) -> list[tuple[str, str]]:
     """Return available products as choices object."""
     # Search for products already included for an ordered table.
-    not_available = Order.objects.filter(table__code=table_code).values_list(
+    not_available = Order.objects.filter(
+        table__code=table_code,
+        is_close=False,
+    ).values_list(
         "product_id",
         flat=True,
     )

@@ -16,18 +16,17 @@ _table_api_schema = partial(extend_schema, tags=["Tables"])
 # noinspection PyUnusedLocal
 @_table_api_schema(
     summary="Get table",
-    request=srz.TableCreateSerializer,
     responses=OpenApiResponse(
         response=srz.TableInfoSerializer,
-        description="Table successfully created.",
+        description="Table successfully retrieved.",
     ),
 )
 @api_view(["GET"])
 @permission_required("tables.view_table")
 def get_table(request, table_id: int) -> Response:
     """Return a table's information."""
-    category = sv.get_table(table_id)
-    output = srz.TableInfoSerializer(category)
+    table = sv.get_table(table_id)
+    output = srz.TableInfoSerializer(table)
     return Response(data=output.data, status=HTTP_200_OK)
 
 
@@ -85,8 +84,8 @@ def create_table(request) -> Response:
     payload = srz.TableCreateSerializer(data=request.data)
     payload.check_data()
     data = payload.validated_data
-    category = sv.create_table(user=request.user, **data)
-    output = srz.TableInfoSerializer(category)
+    table = sv.create_table(user=request.user, **data)
+    output = srz.TableInfoSerializer(table)
     return Response(data=output.data, status=HTTP_201_CREATED)
 
 
