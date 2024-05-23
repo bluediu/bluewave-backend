@@ -23,6 +23,14 @@ MAX_QUANTITY = 7
 MIN_QUANTITY = 1
 
 
+class OrderManager(models.Manager):
+    """Custom Order manager."""
+
+    def not_closed(self) -> models.QuerySet:
+        """Return a QuerySet of orders not closed."""
+        return self.filter(is_close=False)
+
+
 class Order(BaseModel):
     """An order db model."""
 
@@ -59,10 +67,13 @@ class Order(BaseModel):
         choices=OrderStatus.choices,
         default=OrderStatus.PENDING,
     )
+    # TODO: Change name, to is_close
     is_close = models.BooleanField(
         verbose_name="Is the order close?",
         default=False,
     )
+
+    objects = OrderManager()
 
     class Meta(BaseModel.Meta):
         verbose_name = "Order"

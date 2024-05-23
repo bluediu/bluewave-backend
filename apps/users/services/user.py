@@ -1,11 +1,16 @@
 from typing import Literal
 
-from django.core.exceptions import ValidationError
-from django.contrib.auth.hashers import make_password
+from django.db import transaction
 from django.db.models import QuerySet
 from django.shortcuts import get_object_or_404
+from django.core.exceptions import ValidationError
+from django.contrib.auth.hashers import make_password
 
 from apps.users.models.user import User
+from django.contrib.auth.models import Permission, Group
+
+DEFAULT_USER_PERMISSION = "view_user"
+DEFAULT_GROUPS = ["Orders", "Payments", "Tables"]
 
 
 def _check_password_match(fields: dict) -> None:
@@ -58,7 +63,19 @@ def create_user(*, request_user: User, **fields: dict) -> User:
     fields["password"] = make_password(fields["password"])
     user = User(**fields, created_by=request_user, updated_by=request_user)
     user.full_clean()
-    user.save()
+
+    with transaction.atomic():
+        # Save user.
+        user.save()
+
+        # Add permission.
+        permission = Permission.objects.get(codename=DEFAULT_USER_PERMISSION)
+        user.user_permissions.add(permission)
+
+        # Add groups
+        groups = Group.objects.filter(name__in=DEFAULT_GROUPS)
+        user.groups.add(*groups)
+
     return user
 
 

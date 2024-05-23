@@ -57,6 +57,7 @@ def register_payment(request) -> Response:
 
 @_payment_api_schema(
     summary="Close a payment",
+    request=None,
     responses=empty_response_spec("Payment successfully closed."),
 )
 @api_view(["PUT"])
