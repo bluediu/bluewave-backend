@@ -74,10 +74,15 @@ def register_payment(*, user: User, fields: _PaymentRegisterT) -> None:
         orders = fields.get("table").orders
 
         # Calculate orders total price.
-        total_price = orders.filter(
-            status=OrderStatus.DELIVERED,
-            is_close=False,
-        ).aggregate(total_price=Sum(F("product__price") * F("quantity")))["total_price"]
+        total_price = (
+            orders.not_closed()
+            .filter(
+                status=OrderStatus.DELIVERED,
+            )
+            .aggregate(total_price=Sum(F("product__price") * F("quantity")))[
+                "total_price"
+            ]
+        )
 
         # Save payment.
         payment = Payment(

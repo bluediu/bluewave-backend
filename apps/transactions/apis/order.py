@@ -175,6 +175,7 @@ def update_order(request, order_code: str) -> Response:
 
 @_order_api_schema(
     summary="Close all orders",
+    request=None,
     responses=empty_response_spec("Orders successfully closed."),
 )
 @api_view(["PUT"])

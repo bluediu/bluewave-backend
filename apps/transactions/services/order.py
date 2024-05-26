@@ -50,7 +50,7 @@ def _validate_order_context(user: User, fields: _OrderRegisterT) -> None:
     if not table.is_active:
         raise ValidationError({"table": inactive_msg})
 
-    if table.orders.filter(product=product, is_close=False).exists():
+    if table.orders.not_closed().filter(product=product).exists():
         raise ValidationError(
             {"table": "Product already exists in an order for this table."}
         )
@@ -70,12 +70,14 @@ def get_order(order_code: str) -> Order:
 
 def get_order_state(table_code: str) -> dict:
     """Get order state info."""
-    info = Order.objects.filter(
-        Q(table__code=table_code) & Q(is_close=False) & ~Q(status=OrderStatus.CANCELED)
-    ).aggregate(
-        total_price=Sum(F("product__price") * F("quantity")),
-        count_pending=Count("code", filter=Q(status=OrderStatus.PENDING)),
-        count_delivered=Count("code", filter=Q(status=OrderStatus.DELIVERED)),
+    info = (
+        Order.objects.not_closed()
+        .filter(Q(table__code=table_code) & ~Q(status=OrderStatus.CANCELED))
+        .aggregate(
+            total_price=Sum(F("product__price") * F("quantity")),
+            count_pending=Count("code", filter=Q(status=OrderStatus.PENDING)),
+            count_delivered=Count("code", filter=Q(status=OrderStatus.DELIVERED)),
+        )
     )
 
     return info
@@ -85,10 +87,8 @@ def list_order_products(table_code: str) -> list[Order]:
     """Return a list of products for a table order."""
 
     order_products = (
-        Order.objects.filter(
-            table__code=table_code,
-            is_close=False,
-        )
+        Order.objects.not_closed()
+        .filter(table__code=table_code)
         .select_related("product", "product__category")
         .annotate(
             status_label=Case(
@@ -182,7 +182,7 @@ def close_orders_bulk(*, user: User, table: Table) -> None:
     orders = table.orders
 
     all_orders_canceled = (
-        not orders.filter(is_close=False).exclude(status=OrderStatus.CANCELED).exists()
+        not orders.not_closed().exclude(status=OrderStatus.CANCELED).exists()
     )
 
     if not all_orders_canceled:

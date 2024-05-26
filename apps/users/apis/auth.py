@@ -21,6 +21,7 @@ class CustomTokenWithUserInfoSerializer(TokenObtainPairSerializer):
         """Add user ID to the token."""
         token = super().get_token(user)
         token["user_id"] = user.id
+        token["superuser"] = user.is_superuser
         return token
 
     def validate(self, attrs):

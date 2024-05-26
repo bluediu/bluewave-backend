@@ -1,8 +1,9 @@
 from typing import Literal
 
 from django.db import transaction
-from django.shortcuts import get_object_or_404
 from django.db.models import QuerySet
+from django.shortcuts import get_object_or_404
+from django.core.validators import ValidationError
 from django.core.files.storage import default_storage
 
 from apps.products.models import Product
@@ -40,6 +41,15 @@ def create_product(*, user: User, **fields: dict) -> Product:
 def update_product(*, product: Product, user: User, **fields: dict) -> Product:
     """Update a product."""
     existing_image = product.image.name
+
+    in_process_transaction = product.orders.not_closed().exists()
+    if in_process_transaction:
+        msg = (
+            "This product can't be edited because it is currently "
+            "in a pending transaction."
+        )
+        raise ValidationError({"product": msg})
+
     with transaction.atomic():
         changed_fields = product.update_fields(**fields)
         if changed_fields:

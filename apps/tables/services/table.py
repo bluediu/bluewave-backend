@@ -1,6 +1,7 @@
 from typing import Literal
 
 from django.shortcuts import get_object_or_404
+from django.core.validators import ValidationError
 from django.db.models import (
     Q,
     Case,
@@ -63,10 +64,9 @@ def list_table_order_statuses() -> dict:
                 When(
                     orders_number=0,
                     then=Exists(
-                        Order.objects.filter(
+                        Order.objects.not_closed().filter(
                             table_id=OuterRef("id"),
                             status=OrderStatus.DELIVERED,
-                            is_close=False,
                         )
                     ),
                 ),
@@ -77,17 +77,15 @@ def list_table_order_statuses() -> dict:
                 When(
                     # Check if there are any non-closed orders for the table.
                     Exists(
-                        Order.objects.filter(
+                        Order.objects.not_closed().filter(
                             table_id=OuterRef("id"),
-                            is_close=False,
                         )
                     ),
                     # If there are non-closed orders, check if all of them are canceled.
                     then=~Exists(
-                        Order.objects.filter(
-                            table_id=OuterRef("id"),
-                            is_close=False,
-                        ).exclude(status=OrderStatus.CANCELED)
+                        Order.objects.not_closed()
+                        .filter(table_id=OuterRef("id"))
+                        .exclude(status=OrderStatus.CANCELED)
                     ),
                 ),
                 # If there are no non-closed orders, set to False.
@@ -118,6 +116,11 @@ def create_table(*, user: User, **fields: dict) -> Table:
 
 def update_table(*, table: Table, user: User, **fields: dict) -> Table:
     """Update a table."""
+    processing_orders = table.orders.not_closed().exists()
+    if processing_orders:
+        msg = "This table can't be edited because it is currently processing orders."
+        raise ValidationError({"table": msg})
+
     changed_fields = table.update_fields(**fields)
     if changed_fields:
         table.full_clean()
