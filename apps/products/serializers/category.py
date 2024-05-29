@@ -22,6 +22,29 @@ class CategoryInfoSerializer(Serializer):
     updated_at = srz.DateTimeField(help_text="Updated at time.")
 
 
+class CategoryProductsInfoSerializer(Serializer):
+    """Products by category info output serializer."""
+
+    id = srz.IntegerField(
+        help_text="Product ID",
+    )
+    name = srz.CharField(
+        help_text="Product name.",
+    )
+    price = srz.IntegerField(
+        help_text="Price in dollar cents.",
+    )
+    is_active = srz.BooleanField(
+        help_text="Is product active?",
+    )
+    image = srz.ImageField(
+        help_text="Product image.",
+    )
+    category_name = srz.CharField(
+        help_text="Product category.",
+    )
+
+
 class CategoryCreateSerializer(Serializer):
     """A category create input serializer."""
 
