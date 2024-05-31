@@ -1,19 +1,36 @@
 from typing import Literal
 
 from django.db import transaction
-from django.db.models import QuerySet
+from django.db.models import QuerySet, F
 from django.shortcuts import get_object_or_404
 from django.core.validators import ValidationError
 from django.core.files.storage import default_storage
 
-from apps.products.models import Category
-from apps.transactions.models import Order
 from apps.users.models import User
+from apps.transactions.models import Order
+from apps.products.models import Category, Product
 
 
 def get_category(category_id: int) -> Category:
     """Return a category."""
     return get_object_or_404(Category, id=category_id)
+
+
+def get_products_by_category(
+    category_id: int,
+    filter_by: Literal["all", "actives", "inactives"],
+) -> QuerySet:
+    """Return a queryset of products."""
+    products = Product.objects.filter(category_id=category_id).annotate(
+        category_name=F("category__name"),
+    )
+
+    if filter_by == "actives":
+        products = products.filter(is_active=True)
+    elif filter_by == "inactives":
+        products = products.filter(is_active=False)
+
+    return products
 
 
 def list_categories(

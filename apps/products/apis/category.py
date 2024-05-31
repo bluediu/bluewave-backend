@@ -5,10 +5,11 @@ from rest_framework.response import Response
 from rest_framework.status import HTTP_200_OK, HTTP_201_CREATED
 from drf_spectacular.utils import OpenApiResponse, extend_schema
 
-from apps.products.serializers import category as srz
-from apps.products.services import category as sv
-from common.decorators import permission_required
 from common import functions as fn
+from common.api import filter_parameter_spec
+from common.decorators import permission_required
+from apps.products.services import category as sv
+from apps.products.serializers import category as srz
 
 _category_api_schema = partial(extend_schema, tags=["Categories"])
 
@@ -34,6 +35,7 @@ def get_category(request, category_id: int) -> Response:
 # noinspection PyUnusedLocal
 @_category_api_schema(
     summary="List categories",
+    parameters=[filter_parameter_spec(scope="categories")],
     responses=OpenApiResponse(
         response=srz.CategoryInfoSerializer(many=True),
         description="Categories successfully retrieved.",
@@ -46,6 +48,27 @@ def list_categories(request) -> Response:
     filter_by = fn.validate_filter_query_param(request.query_params)
     output = srz.CategoryInfoSerializer(
         sv.list_categories(filter_by=filter_by),
+        many=True,
+    )
+    return Response(data=output.data, status=HTTP_200_OK)
+
+
+# noinspection PyUnusedLocal
+@_category_api_schema(
+    summary="List products by category",
+    parameters=[filter_parameter_spec(scope="products")],
+    responses=OpenApiResponse(
+        response=srz.CategoryProductsInfoSerializer(many=True),
+        description="Products by category successfully retrieved.",
+    ),
+)
+@api_view(["GET"])
+@permission_required("products.list_category")
+def list_product_by_category(request, category_id: int) -> Response:
+    """Return a list of products by category."""
+    filter_by = fn.validate_filter_query_param(request.query_params)
+    output = srz.CategoryProductsInfoSerializer(
+        sv.get_products_by_category(category_id, filter_by),
         many=True,
     )
     return Response(data=output.data, status=HTTP_200_OK)

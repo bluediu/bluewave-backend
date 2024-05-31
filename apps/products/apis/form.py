@@ -1,15 +1,15 @@
 from functools import partial
 
 from django.forms import model_to_dict
-from rest_framework.decorators import api_view, authentication_classes
 from rest_framework.response import Response
 from rest_framework.status import HTTP_200_OK
 from drf_spectacular.utils import OpenApiResponse, extend_schema
+from rest_framework.decorators import api_view, authentication_classes
 
 from apps.products import forms as fr
-from apps.products.services.category import get_category
-from apps.products.services.product import get_product
 from common.functions import form_to_api_schema
+from apps.products.services.product import get_product
+from apps.products.services.category import get_category
 
 
 _product_form_api_schema = partial(extend_schema, tags=["Forms"])

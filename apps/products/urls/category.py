@@ -11,6 +11,7 @@ api_patterns = [
             [
                 path("get/", api.get_category, name="get"),
                 path("update/", api.update_category, name="update"),
+                path("products/", api.list_product_by_category, name="products"),
             ]
         ),
     ),

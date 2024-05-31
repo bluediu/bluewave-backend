@@ -1,20 +1,22 @@
 from functools import partial
 
-from rest_framework.decorators import api_view
 from rest_framework.response import Response
+from rest_framework.decorators import api_view
 from rest_framework.status import HTTP_200_OK, HTTP_201_CREATED
 from drf_spectacular.utils import OpenApiResponse, extend_schema
 
+from common import functions as fn
+from common.api import filter_parameter_spec
 from apps.products.services import product as sv
+from common.decorators import permission_required
 from apps.products.serializers import product as srz
 from apps.products.services.category import get_category
-from common.decorators import permission_required
-from common import functions as fn
 
 
 _product_api_schema = partial(extend_schema, tags=["Products"])
 
 
+# noinspection PyUnusedLocal
 @_product_api_schema(
     summary="Get product",
     request=srz.ProductCreateSerializer,
@@ -35,6 +37,7 @@ def get_product(request, product_id: int) -> Response:
 # noinspection PyUnusedLocal
 @_product_api_schema(
     summary="List products",
+    parameters=[filter_parameter_spec(scope="products")],
     responses=OpenApiResponse(
         response=srz.ProductInfoSerializer(many=True),
         description="Products successfully retrieved.",
