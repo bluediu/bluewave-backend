@@ -20,6 +20,17 @@ class TableInfoSerializer(Serializer):
     updated_at = srz.DateTimeField(help_text="Updated at time.")
 
 
+class TableLoginTokenSerializer(Serializer):
+    """A table info output serializer."""
+
+    access = srz.CharField(
+        help_text="Authentication access token.",
+    )
+    code = srz.CharField(
+        help_text="Table code",
+    )
+
+
 class TableOrderStatusSerializer(Serializer):
     """A table order status output serializer."""
 
@@ -52,6 +63,12 @@ class TableCreateSerializer(Serializer):
             "follow a sequence pattern like '000X'."
         ),
     )
+
+
+class TableLoginSerializer(Serializer):
+    """A table login input serializer."""
+
+    code = srz.CharField()
 
 
 class TableUpdateSerializer(TableCreateSerializer):

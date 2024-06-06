@@ -14,7 +14,7 @@ from common.functions import form_to_api_schema
 _table_form_api_schema = partial(extend_schema, tags=["Forms"])
 
 
-# **=========== Category ===========**
+# **=========== Table ===========**
 # noinspection PyUnusedLocal
 @_table_form_api_schema(
     summary="[Table] create form",
@@ -27,6 +27,20 @@ _table_form_api_schema = partial(extend_schema, tags=["Forms"])
 def get_create_table_form(request) -> Response:
     """Return a table create form schema."""
     form = form_to_api_schema(form=fr.TableCreateForm)
+    return Response(data=form, status=HTTP_200_OK)
+
+
+# noinspection PyUnusedLocal
+@_table_form_api_schema(
+    summary="[Table] login form",
+    responses=OpenApiResponse(
+        description="Login table form successfully retrieved.",
+    ),
+)
+@authentication_classes(None)
+@api_view(["GET"])
+def get_login_table_form(request) -> Response:
+    form = form_to_api_schema(form=fr.TableLoginForm())
     return Response(data=form, status=HTTP_200_OK)
 
 

@@ -1,6 +1,6 @@
 from functools import partial
 
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, authentication_classes
 from rest_framework.response import Response
 from rest_framework.status import HTTP_200_OK, HTTP_201_CREATED
 from drf_spectacular.utils import OpenApiResponse, extend_schema
@@ -27,6 +27,27 @@ def get_table(request, table_id: int) -> Response:
     """Return a table's information."""
     table = sv.get_table(table_id)
     output = srz.TableInfoSerializer(table)
+    return Response(data=output.data, status=HTTP_200_OK)
+
+
+# noinspection PyUnusedLocal
+@_table_api_schema(
+    summary="Login table",
+    request=srz.TableLoginSerializer,
+    responses=OpenApiResponse(
+        response=srz.TableLoginTokenSerializer,
+        description="Table login successfully.",
+    ),
+)
+@authentication_classes(None)
+@api_view(["POST"])
+def login_table(request) -> Response:
+    """Login table for clients app."""
+    payload = srz.TableLoginSerializer(data=request.data)
+    payload.check_data()
+    data = payload.validated_data
+    table = sv.login_table(table_code=data["code"])
+    output = srz.TableLoginTokenSerializer(table)
     return Response(data=output.data, status=HTTP_200_OK)
 
 
