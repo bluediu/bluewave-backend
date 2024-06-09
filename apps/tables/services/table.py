@@ -1,7 +1,10 @@
+import envtoml
 from typing import Literal
 
+from django.contrib.auth import authenticate
 from django.shortcuts import get_object_or_404
 from django.core.validators import ValidationError
+from rest_framework_simplejwt.tokens import AccessToken
 from django.db.models import (
     Q,
     Case,
@@ -26,6 +29,25 @@ def get_table(table_id: int) -> Table:
 def get_table_by_code(table_code: str) -> Table:
     """Return a table."""
     return get_object_or_404(Table, code=table_code)
+
+
+def login_table(table_code: str) -> dict:
+    """Login a table."""
+
+    # Check table existence.
+    table_exists: bool = Table.objects.filter(code=table_code).exists()
+    if not table_exists:
+        raise ValidationError({"table": "Table not found."})
+
+    # User auth & token generation.
+    envs = envtoml.load(open("./env.toml"))
+    user = authenticate(
+        username="bluewave",
+        password=envs["core"]["user_client_password"],
+    )
+    access = AccessToken.for_user(user)
+    access["code"] = table_code
+    return {"access": access, "code": table_code}
 
 
 def list_tables(

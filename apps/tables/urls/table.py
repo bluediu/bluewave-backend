@@ -6,6 +6,7 @@ api_patterns = [
     path("list/", api.list_tables, name="list"),
     path("list/order_statuses/", api.list_table_order_statuses, name="order_statuses"),
     path("create/", api.create_table, name="create"),
+    path("login/", api.login_table, name="login"),
     path(
         "<int:table_id>/",
         include(

@@ -13,6 +13,21 @@ class TableCreateForm(forms.Form):
     )
 
 
+class TableLoginForm(forms.Form):
+    """A login table form schema."""
+
+    fields_from_model = forms.fields_for_model(
+        Table,
+        fields=["code"],
+    )
+
+    def __init__(self, *args, **kwargs):
+        """Change field definition."""
+        super().__init__(*args, **kwargs)
+
+        self.fields_from_model["code"].help_text = ""
+
+
 class TableUpdateForm(forms.Form):
     """A update table form schema."""
 
