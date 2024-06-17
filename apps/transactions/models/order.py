@@ -28,7 +28,7 @@ class OrderManager(models.Manager):
 
     def not_closed(self) -> models.QuerySet:
         """Return a QuerySet of orders not closed."""
-        return self.filter(is_close=False)
+        return self.filter(is_closed=False)
 
 
 class Order(BaseModel):
@@ -61,14 +61,12 @@ class Order(BaseModel):
             f"{MIN_QUANTITY} and {MAX_QUANTITY}"
         ),
     )
-    # todo: Add payment model FK
     status = models.TextField(
         verbose_name="Status",
         choices=OrderStatus.choices,
         default=OrderStatus.PENDING,
     )
-    # TODO: Change name, to is_close
-    is_close = models.BooleanField(
+    is_closed = models.BooleanField(
         verbose_name="Is the order close?",
         default=False,
     )

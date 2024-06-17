@@ -79,7 +79,7 @@ def list_table_order_statuses() -> dict:
                 "orders",
                 filter=Q(
                     orders__status=OrderStatus.PENDING,
-                    orders__is_close=False,
+                    orders__is_closed=False,
                 ),
             ),
             all_orders_delivered=Case(

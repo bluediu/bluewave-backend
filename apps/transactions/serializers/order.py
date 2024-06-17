@@ -4,6 +4,7 @@ from rest_framework import serializers as srz
 from apps.tables.serializers.table import TableInfoSerializer
 from apps.products.serializers.product import ProductInfoSerializer
 
+from apps.products.models import Product
 from apps.transactions.models import MIN_QUANTITY, MAX_QUANTITY, OrderStatus
 from common.serializers import Serializer
 
@@ -17,7 +18,7 @@ class OrderInfoSerializer(Serializer):
     status = srz.CharField(
         help_text="Status.",
     )
-    is_close = srz.BooleanField(
+    is_closed = srz.BooleanField(
         help_text="Is the order close?",
     )
     table = TableInfoSerializer(
@@ -40,6 +41,9 @@ class OrderProductsInfoSerializer(Serializer):
         help_text="Order Code.",
     )
     status_label = srz.CharField(help_text="Order status.")
+    product_id = srz.CharField(
+        help_text="Product ID.",
+    )
     product_name = srz.CharField(
         help_text="Product name.",
     )
@@ -52,7 +56,7 @@ class OrderProductsInfoSerializer(Serializer):
     product_price = srz.IntegerField(
         help_text="Product price.",
     )
-    is_close = srz.BooleanField(
+    is_closed = srz.BooleanField(
         help_text="Is the order close?",
     )
     quantity = srz.IntegerField(
@@ -96,6 +100,32 @@ class OrderRegisterSerializer(Serializer):
         help_text="Product quantity.",
         validators=[MinValueValidator(MIN_QUANTITY), MaxValueValidator(MAX_QUANTITY)],
         required=False,
+    )
+
+
+class _ProductsInOrder(Serializer):
+    """An product serializer (raw)."""
+
+    product = srz.PrimaryKeyRelatedField(
+        queryset=Product.objects.all(),
+        help_text="Product ID",
+    )
+    quantity = srz.IntegerField(
+        help_text="Product quantity.",
+        validators=[MinValueValidator(MIN_QUANTITY), MaxValueValidator(MAX_QUANTITY)],
+        required=False,
+    )
+
+
+class OrderBulkRegisterSerializer(Serializer):
+    """Bulk orders register input serializer."""
+
+    table = srz.CharField(
+        help_text="Table Code.",
+    )
+    products = srz.ListField(
+        child=_ProductsInOrder(),
+        help_text="Products item.",
     )
 
 

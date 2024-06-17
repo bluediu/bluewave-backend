@@ -1,5 +1,6 @@
-from typing import TypedDict, Required, NotRequired
+from typing import List, TypedDict, Required, NotRequired
 
+from django.db import transaction
 from django.utils.timezone import now
 from django.db.models.functions import Concat
 from django.shortcuts import get_object_or_404
@@ -29,6 +30,13 @@ class _OrderRegisterT(TypedDict):
     quantity: NotRequired[int]
 
 
+class _BulkOrderRegisterT(TypedDict):
+    """An order register type."""
+
+    table: Required[Table]
+    products: Required[List[_OrderRegisterT]]
+
+
 class _OrderUpdateT(TypedDict):
     """An order update type."""
 
@@ -52,7 +60,12 @@ def _validate_order_context(user: User, fields: _OrderRegisterT) -> None:
 
     if table.orders.not_closed().filter(product=product).exists():
         raise ValidationError(
-            {"table": "Product already exists in an order for this table."}
+            {
+                "table": (
+                    f"Product '{product.id}' already exists in an order"
+                    f" for this table."
+                )
+            }
         )
 
     if pending_payment_exists(table=table):
@@ -127,7 +140,7 @@ def search_orders(
     if status:
         orders = orders.filter(status=status)
     if close:
-        orders = orders.filter(is_close=close)
+        orders = orders.filter(is_closed=close)
 
     return orders.order_by("-created_at")
 
@@ -139,6 +152,40 @@ def register_order(*, user: User, fields: _OrderRegisterT) -> None:
     order = Order(code=generate_random_code(), **fields)
     order.full_clean()
     order.save(user.id)
+
+
+@transaction.atomic
+def register_bulk_orders(*, user: User, fields: _BulkOrderRegisterT) -> None:
+    """Register bulk orders."""
+    orders: List[Order] = []
+
+    for item in fields["products"]:
+        # Validate products integrity.
+        _validate_order_context(
+            user,
+            fields={
+                "table": fields["table"],
+                "product": item["product"],
+                "quantity": item["quantity"],
+            },
+        )
+
+        # Define entry.
+        orders.append(
+            Order(
+                code=generate_random_code(),
+                table=fields["table"],
+                product=item["product"],
+                quantity=item["quantity"],
+                created_at=now(),
+                updated_at=now(),
+                created_by=user,
+                updated_by=user,
+            )
+        )
+
+    # Save orders.
+    Order.objects.bulk_create(objs=orders, batch_size=len(orders))
 
 
 def update_order(*, order: Order, user: User, **fields: _OrderUpdateT) -> Order:
@@ -192,7 +239,7 @@ def close_orders_bulk(*, user: User, table: Table) -> None:
 
     # Close associated table orders.
     orders.update(
-        is_close=True,
+        is_closed=True,
         updated_at=now(),
         updated_by_id=user.id,
     )

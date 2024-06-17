@@ -21,7 +21,7 @@ _product_api_schema = partial(extend_schema, tags=["Products"])
     summary="Get product",
     request=srz.ProductCreateSerializer,
     responses=OpenApiResponse(
-        response=srz.ProductInfoSerializer,
+        response=srz.ProductDetailSerializer,
         description="Product successfully created.",
     ),
 )
@@ -30,7 +30,7 @@ _product_api_schema = partial(extend_schema, tags=["Products"])
 def get_product(request, product_id: int) -> Response:
     """Return a product's information."""
     product = sv.get_product(product_id)
-    output = srz.ProductInfoSerializer(product)
+    output = srz.ProductDetailSerializer(product)
     return Response(data=output.data, status=HTTP_200_OK)
 
 

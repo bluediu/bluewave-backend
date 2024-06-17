@@ -1,18 +1,25 @@
 from typing import Literal
 
 from django.db import transaction
-from django.db.models import QuerySet
+from django.db.models import QuerySet, Value
 from django.shortcuts import get_object_or_404
 from django.core.validators import ValidationError
 from django.core.files.storage import default_storage
 
 from apps.products.models import Product
 from apps.users.models import User
+from apps.transactions.models import (
+    MAX_QUANTITY,
+    MIN_QUANTITY,
+)
 
 
 def get_product(product_id: int) -> Product:
     """Return a product."""
-    return get_object_or_404(Product, id=product_id)
+    product = get_object_or_404(Product, id=product_id)
+    product.max_qty = MAX_QUANTITY
+    product.min_qty = MIN_QUANTITY
+    return product
 
 
 def list_products(
@@ -26,7 +33,6 @@ def list_products(
         products = products.filter(is_active=True)
     elif filter_by == "inactives":
         products = products.filter(is_active=False)
-
     return products.order_by("id")
 
 
