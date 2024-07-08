@@ -39,6 +39,17 @@ class ProductInfoSerializer(Serializer):
     updated_at = srz.DateTimeField(help_text="Updated at time.")
 
 
+class ProductDetailSerializer(ProductInfoSerializer):
+    """A product detail output serializer."""
+
+    max_qty = srz.IntegerField(
+        help_text="Max. quantity of product in an order.",
+    )
+    min_qty = srz.IntegerField(
+        help_text="Min. quantity of product in an order.",
+    )
+
+
 class ProductCreateSerializer(Serializer):
     """A product create input serializer."""
 

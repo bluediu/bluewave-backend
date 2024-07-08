@@ -31,6 +31,9 @@ class CategoryProductsInfoSerializer(Serializer):
     name = srz.CharField(
         help_text="Product name.",
     )
+    description = srz.CharField(
+        help_text="Product description.",
+    )
     price = srz.IntegerField(
         help_text="Price in dollar cents.",
     )
@@ -42,6 +45,12 @@ class CategoryProductsInfoSerializer(Serializer):
     )
     category_name = srz.CharField(
         help_text="Product category.",
+    )
+    max_qty = srz.IntegerField(
+        help_text="Max. quantity of product in an order.",
+    )
+    min_qty = srz.IntegerField(
+        help_text="Min. quantity of product in an order.",
     )
 
 

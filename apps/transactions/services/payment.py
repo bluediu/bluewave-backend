@@ -104,7 +104,7 @@ def close_payment(*, user: User, table: Table) -> None:
 
         # Close associated table orders.
         table.orders.update(
-            is_close=True,
+            is_closed=True,
             updated_at=now(),
             updated_by_id=user.id,
         )

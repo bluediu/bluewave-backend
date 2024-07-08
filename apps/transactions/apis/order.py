@@ -128,13 +128,30 @@ def list_order_products(request, table_code: str) -> Response:
 @api_view(["POST"])
 @permission_required("transactions.create_order")
 def register_order(request) -> Response:
-    """Register a new order/transaction."""
+    """Register a new order/."""
     payload = srz.OrderRegisterSerializer(data=request.data)
     payload.check_data()
     data = payload.validated_data
     data["table"] = get_table_by_code(table_code=data["table"])
     data["product"] = get_product(product_id=data["product"])
     sv.register_order(user=request.user, fields=data)
+    return Response(status=HTTP_201_CREATED)
+
+
+@_order_api_schema(
+    summary="Register bulk orders",
+    request=srz.OrderBulkRegisterSerializer,
+    responses=empty_response_spec("Orders successfully registered."),
+)
+@api_view(["POST"])
+@permission_required("transactions.create_order")
+def register_bulk_orders(request) -> Response:
+    """Register bulk orders/transactions."""
+    payload = srz.OrderBulkRegisterSerializer(data=request.data)
+    payload.check_data()
+    data = payload.validated_data
+    data["table"] = get_table_by_code(table_code=data["table"])
+    sv.register_bulk_orders(user=request.user, fields=data)
     return Response(status=HTTP_201_CREATED)
 
 

@@ -1,13 +1,13 @@
 from typing import Literal
 
 from django.db import transaction
-from django.db.models import QuerySet, F
+from django.db.models import QuerySet, F, Value
 from django.shortcuts import get_object_or_404
 from django.core.validators import ValidationError
 from django.core.files.storage import default_storage
 
 from apps.users.models import User
-from apps.transactions.models import Order
+from apps.transactions.models import Order, MAX_QUANTITY, MIN_QUANTITY
 from apps.products.models import Category, Product
 
 
@@ -23,6 +23,8 @@ def get_products_by_category(
     """Return a queryset of products."""
     products = Product.objects.filter(category_id=category_id).annotate(
         category_name=F("category__name"),
+        max_qty=Value(MAX_QUANTITY),
+        min_qty=Value(MIN_QUANTITY),
     )
 
     if filter_by == "actives":
