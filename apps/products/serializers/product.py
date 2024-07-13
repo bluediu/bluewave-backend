@@ -39,6 +39,20 @@ class ProductInfoSerializer(Serializer):
     updated_at = srz.DateTimeField(help_text="Updated at time.")
 
 
+class ProductLatestInfoSerializer(Serializer):
+    """A product latest info output serializer."""
+
+    id = srz.IntegerField(
+        help_text="Product ID",
+    )
+    name = srz.CharField(
+        help_text="Product name.",
+    )
+    image = srz.ImageField(
+        help_text="Product image.",
+    )
+
+
 class ProductDetailSerializer(ProductInfoSerializer):
     """A product detail output serializer."""
 

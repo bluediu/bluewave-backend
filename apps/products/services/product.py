@@ -36,6 +36,14 @@ def list_products(
     return products.order_by("id")
 
 
+def list_latest_products() -> QuerySet[Product]:
+    """Return a list of 5 latest products."""
+    fields = ["id", "name", "image", "created_at"]
+    # Use `only` to return instances.
+    products = Product.objects.only(*fields).order_by("-created_at")[:5]
+    return products
+
+
 def create_product(*, user: User, **fields: dict) -> Product:
     """Create a product."""
     product = Product(**fields)

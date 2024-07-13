@@ -57,6 +57,25 @@ def list_products(request) -> Response:
     return Response(data=output.data, status=HTTP_200_OK)
 
 
+# noinspection PyUnusedLocal
+@_product_api_schema(
+    summary="List latest products",
+    responses=OpenApiResponse(
+        response=srz.ProductLatestInfoSerializer(many=True),
+        description="Products successfully retrieved.",
+    ),
+)
+@api_view(["GET"])
+@permission_required("product.list_product")
+def list_latest_products(request) -> Response:
+    """Return a list of five latest products."""
+    output = srz.ProductLatestInfoSerializer(
+        sv.list_latest_products(),
+        many=True,
+    )
+    return Response(data=output.data, status=HTTP_200_OK)
+
+
 @_product_api_schema(
     summary="Create product",
     request=srz.ProductCreateSerializer,

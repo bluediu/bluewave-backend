@@ -4,6 +4,7 @@ import apps.products.apis.product as api
 
 api_patterns = [
     path("list/", api.list_products, name="list"),
+    path("list/latest/", api.list_latest_products, name="latest"),
     path("create/", api.create_product, name="create"),
     path(
         "<int:product_id>/",

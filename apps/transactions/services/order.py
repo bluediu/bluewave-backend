@@ -96,6 +96,12 @@ def get_order_state(table_code: str) -> dict:
     return info
 
 
+def get_order_count(table_code: str) -> dict:
+    """Get order count."""
+    count = Order.objects.not_closed().filter(table__code=table_code).count()
+    return {"count": count}
+
+
 def list_order_products(table_code: str) -> list[Order]:
     """Return a list of products for a table order."""
 
