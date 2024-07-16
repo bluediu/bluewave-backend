@@ -40,8 +40,10 @@ class OrderProductsInfoSerializer(Serializer):
     code = srz.CharField(
         help_text="Order Code.",
     )
-    status_label = srz.CharField(help_text="Order status.")
-    product_id = srz.CharField(
+    status_label = srz.CharField(
+        help_text="Order status.",
+    )
+    product_id = srz.IntegerField(
         help_text="Product ID.",
     )
     product_name = srz.CharField(
@@ -83,6 +85,14 @@ class OrderStateInfoSerializer(Serializer):
     )
     count_delivered = srz.IntegerField(
         help_text="Count delivered orders for a table.",
+    )
+
+
+class OrderCountSerializer(Serializer):
+    """An order counting output serializer."""
+
+    count = srz.IntegerField(
+        help_text="count the number of orders associated with a table.",
     )
 
 

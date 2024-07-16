@@ -85,6 +85,23 @@ def get_order_state(request, table_code: str) -> Response:
 
 # noinspection PyUnusedLocal
 @_order_api_schema(
+    summary="Get order count",
+    responses=OpenApiResponse(
+        response=srz.OrderCountSerializer,
+        description="Order count successfully retrieved.",
+    ),
+)
+@api_view(["GET"])
+@permission_required("tables.get_order")
+def get_order_count(request, table_code: str) -> Response:
+    """Get order count information."""
+    data = sv.get_order_count(table_code)
+    output = srz.OrderCountSerializer(data)
+    return Response(data=output.data, status=HTTP_200_OK)
+
+
+# noinspection PyUnusedLocal
+@_order_api_schema(
     summary="Search orders",
     parameters=order_search_params_specs,
     responses=OpenApiResponse(
