@@ -48,6 +48,24 @@ def get_update_category_form(request, category_id: int) -> Response:
 
 
 # **=========== Product ===========**
+
+
+# noinspection PyUnusedLocal
+@_product_form_api_schema(
+    summary="[Product] filter form",
+    responses=OpenApiResponse(
+        description="Filter products form successfully retrieved.",
+    ),
+)
+@authentication_classes(None)
+@api_view(["GET"])
+def get_filter_products_form(request) -> Response:
+    """Return a filter products form schema."""
+    form = fr.FilterProductForm()
+    form_schema = form_to_api_schema(form=form)
+    return Response(data=form_schema, status=HTTP_200_OK)
+
+
 # noinspection PyUnusedLocal
 @_product_form_api_schema(
     summary="[Product] create form",

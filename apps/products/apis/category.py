@@ -3,7 +3,7 @@ from functools import partial
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.status import HTTP_200_OK, HTTP_201_CREATED
-from drf_spectacular.utils import OpenApiResponse, extend_schema
+from drf_spectacular.utils import OpenApiResponse, extend_schema, OpenApiParameter
 
 from common import functions as fn
 from common.api import filter_parameter_spec
@@ -13,10 +13,18 @@ from apps.products.serializers import category as srz
 
 _category_api_schema = partial(extend_schema, tags=["Categories"])
 
+_category_id_params = OpenApiParameter(
+    name="category_id",
+    description="Category ID.",
+    location=OpenApiParameter.PATH,
+    type=int,
+)
+
 
 # noinspection PyUnusedLocal
 @_category_api_schema(
     summary="Get category",
+    parameters=[_category_id_params],
     request=srz.CategoryCreateSerializer,
     responses=OpenApiResponse(
         response=srz.CategoryInfoSerializer,
@@ -35,7 +43,7 @@ def get_category(request, category_id: int) -> Response:
 # noinspection PyUnusedLocal
 @_category_api_schema(
     summary="List categories",
-    parameters=[filter_parameter_spec(scope="categories")],
+    parameters=[filter_parameter_spec(scope="categories"), _category_id_params],
     responses=OpenApiResponse(
         response=srz.CategoryInfoSerializer(many=True),
         description="Categories successfully retrieved.",
@@ -56,7 +64,7 @@ def list_categories(request) -> Response:
 # noinspection PyUnusedLocal
 @_category_api_schema(
     summary="List products by category",
-    parameters=[filter_parameter_spec(scope="products")],
+    parameters=[filter_parameter_spec(scope="products"), _category_id_params],
     responses=OpenApiResponse(
         response=srz.CategoryProductsInfoSerializer(many=True),
         description="Products by category successfully retrieved.",
@@ -96,6 +104,7 @@ def create_category(request) -> Response:
 
 @_category_api_schema(
     summary="Update category",
+    parameters=[_category_id_params],
     request=srz.CategoryUpdateSerializer,
     responses=OpenApiResponse(
         response=srz.CategoryInfoSerializer,

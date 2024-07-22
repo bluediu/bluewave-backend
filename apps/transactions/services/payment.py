@@ -1,15 +1,19 @@
 from typing import TypedDict, Required
 
 from django.db import transaction
-from django.db.models import F, Sum
 from django.utils.timezone import now
+from django.db.models.functions import Concat
+from django.db.models import QuerySet, F, Sum, Value, CharField
+from django.shortcuts import get_object_or_404
 from django.core.validators import ValidationError
 from django.core.exceptions import ObjectDoesNotExist
 
 from apps.users.models import User
 from apps.tables.models import Table
-from common.functions import generate_random_code
-from apps.transactions.models import OrderStatus, Payment, PaymentStatus
+from apps.tables.services.table import get_table_by_code
+from apps.transactions.models import Order, OrderStatus, Payment, PaymentStatus
+
+from common import functions as fn
 
 
 class _PaymentRegisterT(TypedDict):
@@ -56,7 +60,6 @@ def get_payment(table_code: str) -> Payment | None:
     try:
         payment = Payment.objects.get(
             table__code=table_code,
-            # TODO: Make this conditional
             status=PaymentStatus.PENDING,
         )
         payment.type = payment.get_type_display()
@@ -64,6 +67,52 @@ def get_payment(table_code: str) -> Payment | None:
         return payment
     except ObjectDoesNotExist:
         return None
+
+
+def list_orders_by_payment(code: str) -> QuerySet[Order]:
+    """Return a list of orders by payment."""
+    payment = get_object_or_404(Payment, pk=code)
+    orders = (
+        payment.orders.filter(is_closed=True)
+        .only("quantity", "product")
+        .annotate(
+            product_name=F("product__name"),
+            product_image=Concat(
+                Value("uploads/"),
+                F("product__image"),
+                output_field=CharField(),
+            ),
+            product_price=F("product__price"),
+            product_category=F("product__category__name"),
+        )
+    )
+
+    return orders
+
+
+def search_payments(
+    payment_type: str = "ALL",
+    code: str = None,
+    since: str = None,
+    until: str = None,
+) -> QuerySet[Payment]:
+    """Return a list of payments."""
+    payments = Payment.objects.filter(status=PaymentStatus.PAID)
+
+    if code:
+        code = get_table_by_code(code)
+        payments = payments.filter(table__code=code)
+    if payment_type != "ALL":
+        payments = payments.filter(type=payment_type)
+    if since and until:
+        payments = payments.filter(
+            created_at__date__range=[
+                fn.parse_date(since),
+                fn.parse_date(until),
+            ]
+        )
+
+    return payments.order_by("-created_at")
 
 
 def register_payment(*, user: User, fields: _PaymentRegisterT) -> None:
@@ -86,7 +135,7 @@ def register_payment(*, user: User, fields: _PaymentRegisterT) -> None:
 
         # Save payment.
         payment = Payment(
-            code=generate_random_code(),
+            code=fn.generate_random_code(),
             total=total_price,
             **fields,
         )
@@ -103,8 +152,9 @@ def close_payment(*, user: User, table: Table) -> None:
         pending_payment.save(user.id, update_fields=["status"])
 
         # Close associated table orders.
-        table.orders.update(
+        table.orders.not_closed().update(
             is_closed=True,
+            payment=pending_payment,
             updated_at=now(),
             updated_by_id=user.id,
         )

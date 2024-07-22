@@ -5,16 +5,36 @@ from common.form import is_active_field
 from common.functions import cents_to_dollar
 
 
-def get_category_choices() -> list[tuple[str, str]]:
+def get_category_choices(all_opt: bool = False) -> list[tuple[str, str]]:
     """Return categories as choices object."""
     categories = (
         Category.objects.filter(is_active=True)
         .values_list("id", "name")
         .order_by("name")
     )
-    categories_choices = [("", "---------")] + list(categories)
+    default_opt = (0, "All") if all_opt else ("", "---------")
+    categories_choices = [default_opt] + list(categories)
 
     return categories_choices
+
+
+class FilterProductForm(forms.Form):
+    """A filter product form schema."""
+
+    fields_from_model = forms.fields_for_model(
+        Product,
+        fields=[
+            "category",
+        ],
+    )
+
+    def __init__(self, *args, **kwargs):
+        """Change fields structure."""
+        super().__init__(*args, **kwargs)
+
+        self.fields_from_model["category"].widget.choices = get_category_choices(
+            all_opt=True
+        )
 
 
 class ProductCreateForm(forms.Form):

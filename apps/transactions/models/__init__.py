@@ -4,9 +4,8 @@ from apps.transactions.models.order import (  # noqa
     MIN_QUANTITY,
     MAX_QUANTITY,
 )
-from apps.transactions.models.payment import (
+from apps.transactions.models.payment import (  # noqa
     Payment,
     PaymentType,
     PaymentStatus,
-    MIN_TOTAL,
-)  # noqa
+)

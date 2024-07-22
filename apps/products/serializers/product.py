@@ -35,6 +35,12 @@ class ProductInfoSerializer(Serializer):
     category = CategoryInfoSerializer(
         help_text="Product category information.",
     )
+    max_qty = srz.IntegerField(
+        help_text="Max. quantity of product in an order.",
+    )
+    min_qty = srz.IntegerField(
+        help_text="Min. quantity of product in an order.",
+    )
     created_at = srz.DateTimeField(help_text="Created at time.")
     updated_at = srz.DateTimeField(help_text="Updated at time.")
 
@@ -50,17 +56,6 @@ class ProductLatestInfoSerializer(Serializer):
     )
     image = srz.ImageField(
         help_text="Product image.",
-    )
-
-
-class ProductDetailSerializer(ProductInfoSerializer):
-    """A product detail output serializer."""
-
-    max_qty = srz.IntegerField(
-        help_text="Max. quantity of product in an order.",
-    )
-    min_qty = srz.IntegerField(
-        help_text="Min. quantity of product in an order.",
     )
 
 

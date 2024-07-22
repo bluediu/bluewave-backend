@@ -3,7 +3,7 @@ from functools import partial
 from rest_framework.decorators import api_view, authentication_classes
 from rest_framework.response import Response
 from rest_framework.status import HTTP_200_OK, HTTP_201_CREATED
-from drf_spectacular.utils import OpenApiResponse, extend_schema
+from drf_spectacular.utils import OpenApiResponse, extend_schema, OpenApiParameter
 
 from apps.tables.services import table as sv
 from apps.tables.serializers import table as srz
@@ -12,10 +12,18 @@ from common import functions as fn
 
 _table_api_schema = partial(extend_schema, tags=["Tables"])
 
+_table_id_params = OpenApiParameter(
+    name="table_id",
+    description="Table ID.",
+    location=OpenApiParameter.PATH,
+    type=int,
+)
+
 
 # noinspection PyUnusedLocal
 @_table_api_schema(
     summary="Get table",
+    parameters=[_table_id_params],
     responses=OpenApiResponse(
         response=srz.TableInfoSerializer,
         description="Table successfully retrieved.",
@@ -112,6 +120,7 @@ def create_table(request) -> Response:
 
 @_table_api_schema(
     summary="Update table",
+    parameters=[_table_id_params],
     request=srz.TableUpdateSerializer,
     responses=OpenApiResponse(
         response=srz.TableInfoSerializer,
