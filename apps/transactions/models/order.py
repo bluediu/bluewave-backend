@@ -7,6 +7,7 @@ from django.core.validators import (
 
 from apps.tables.models import Table
 from apps.products.models import Product
+
 from common.models import BaseModel
 
 
@@ -49,6 +50,14 @@ class Order(BaseModel):
     )
     product = models.ForeignKey(
         Product,
+        related_name="orders",
+        on_delete=models.PROTECT,
+    )
+    payment = models.ForeignKey(
+        # Avoid circular import.
+        "transactions.Payment",
+        null=True,
+        blank=True,
         related_name="orders",
         on_delete=models.PROTECT,
     )

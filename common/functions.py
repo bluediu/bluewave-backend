@@ -1,11 +1,17 @@
 import random
 import string
 from typing import Literal
+from datetime import datetime, date
 
 from django import forms
 from django.http import QueryDict
 from django.forms import fields_for_model
 from django.core.validators import ValidationError
+
+
+def parse_date(date_str: str) -> date:
+    """Parse a date string to date objects."""
+    return datetime.strptime(date_str, "%Y-%m-%d").date()
 
 
 def clean_spaces(content: str) -> str:
@@ -43,7 +49,12 @@ def form_to_api_schema(*, form: fields_for_model) -> dict:
         else:
             return getattr(field_value, "empty_value", "")
 
-    for name, field in form.fields_from_model.items():
+    if hasattr(form, "fields_from_model"):
+        fields = form.fields_from_model
+    else:
+        fields = form.fields
+
+    for name, field in fields.items():
         type_mapping = {
             forms.TextInput: "text",
             forms.EmailInput: "email",
@@ -53,6 +64,7 @@ def form_to_api_schema(*, form: fields_for_model) -> dict:
             forms.Textarea: "textarea",
             forms.ClearableFileInput: "file",
             forms.NumberInput: "number",
+            forms.DateInput: "date",
         }
 
         widget_type = type_mapping.get(field.widget.__class__, "unknown")
@@ -82,6 +94,10 @@ def form_to_api_schema(*, form: fields_for_model) -> dict:
                 for choice in getattr(field.widget, "choices", [])
             ],
             "value": set_field_value(field_value=field),
+            "date": {
+                "max": field.widget.attrs["max"] if widget_type == "date" else "",
+                "min": field.widget.attrs["min"] if widget_type == "date" else "",
+            },
         }
         fields_data.append(field_info)
 

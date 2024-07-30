@@ -9,6 +9,7 @@ products_form_patterns = [
         api.get_update_category_form,
         name="update_category",
     ),
+    path("filter/", api.get_filter_products_form, name="filter_products"),
     path("create_product/", api.get_create_product_form, name="create_product"),
     path(
         "<int:product_id>/update_product/",

@@ -1,9 +1,11 @@
 from functools import partial
+from typing import NotRequired, TypedDict
 
+from django.http import QueryDict
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from rest_framework.status import HTTP_200_OK, HTTP_201_CREATED
-from drf_spectacular.utils import OpenApiResponse, extend_schema
+from drf_spectacular.utils import OpenApiResponse, extend_schema, OpenApiParameter
 
 from common import functions as fn
 from common.api import filter_parameter_spec
@@ -15,13 +17,42 @@ from apps.products.services.category import get_category
 
 _product_api_schema = partial(extend_schema, tags=["Products"])
 
+_product_id_params = OpenApiParameter(
+    name="product_id",
+    description="Product ID.",
+    location=OpenApiParameter.PATH,
+    type=int,
+)
+
+
+class _ProductSearchT(TypedDict):
+    """An product search type."""
+
+    filter_by: NotRequired[str]
+    category: NotRequired[int]
+
+
+def process_product_query_params(query_params: QueryDict) -> _ProductSearchT:
+    """Return serialized and validated query parameters."""
+    params: _ProductSearchT = {}
+
+    filter_by = fn.validate_filter_query_param(query_params)
+    params["filter_by"] = filter_by
+
+    category = query_params.get("category")
+    if category is not None:
+        params["category"] = category
+
+    return params
+
 
 # noinspection PyUnusedLocal
 @_product_api_schema(
     summary="Get product",
+    parameters=[_product_id_params],
     request=srz.ProductCreateSerializer,
     responses=OpenApiResponse(
-        response=srz.ProductDetailSerializer,
+        response=srz.ProductInfoSerializer,
         description="Product successfully created.",
     ),
 )
@@ -30,14 +61,21 @@ _product_api_schema = partial(extend_schema, tags=["Products"])
 def get_product(request, product_id: int) -> Response:
     """Return a product's information."""
     product = sv.get_product(product_id)
-    output = srz.ProductDetailSerializer(product)
+    output = srz.ProductInfoSerializer(product)
     return Response(data=output.data, status=HTTP_200_OK)
 
 
 # noinspection PyUnusedLocal
 @_product_api_schema(
     summary="List products",
-    parameters=[filter_parameter_spec(scope="products")],
+    parameters=[
+        filter_parameter_spec(scope="products"),
+        OpenApiParameter(
+            "category",
+            description="Category ID",
+            type=int,
+        ),
+    ],
     responses=OpenApiResponse(
         response=srz.ProductInfoSerializer(many=True),
         description="Products successfully retrieved.",
@@ -47,11 +85,9 @@ def get_product(request, product_id: int) -> Response:
 @permission_required("product.list_product")
 def list_products(request) -> Response:
     """Return a list of products."""
-    filter_by = fn.validate_filter_query_param(request.query_params)
+    params = process_product_query_params(request.query_params)
     output = srz.ProductInfoSerializer(
-        sv.list_products(
-            filter_by=filter_by,
-        ),
+        sv.list_products(**params),
         many=True,
     )
     return Response(data=output.data, status=HTTP_200_OK)
@@ -99,6 +135,7 @@ def create_product(request) -> Response:
 
 @_product_api_schema(
     summary="Update product",
+    parameters=[_product_id_params],
     request=srz.ProductUpdateSerializer,
     responses=OpenApiResponse(
         response=srz.ProductInfoSerializer,

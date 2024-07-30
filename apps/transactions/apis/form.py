@@ -40,3 +40,18 @@ def get_register_payment_form(request) -> Response:
     """Return a payment register form schema."""
     form_schema = form_to_api_schema(form=fr.PaymentRegisterForm)
     return Response(data=form_schema, status=HTTP_200_OK)
+
+
+# noinspection PyUnusedLocal
+@_transaction_form_api_schema(
+    summary="[Payment] search form",
+    responses=OpenApiResponse(
+        description="Search payment form successfully retrieved.",
+    ),
+)
+@authentication_classes(None)
+@api_view(["GET"])
+def get_search_payment_form(request) -> Response:
+    """Return a payment search form schema."""
+    form_schema = form_to_api_schema(form=fr.PaymentSearchForm())
+    return Response(data=form_schema, status=HTTP_200_OK)

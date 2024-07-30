@@ -14,25 +14,39 @@ from apps.transactions.models import (
 )
 
 
+def _add_qty_props(product: Product) -> Product:
+    """Add quantity properties to product."""
+    product.max_qty = MAX_QUANTITY
+    product.min_qty = MIN_QUANTITY
+    return product
+
+
 def get_product(product_id: int) -> Product:
     """Return a product."""
     product = get_object_or_404(Product, id=product_id)
-    product.max_qty = MAX_QUANTITY
-    product.min_qty = MIN_QUANTITY
+    product = _add_qty_props(product)
     return product
 
 
 def list_products(
     *,
     filter_by: Literal["all", "actives", "inactives"],
+    category: int | None = None,
 ) -> QuerySet[Product]:
     """Return a list of products."""
-    products = Product.objects.select_related("category")
+    products = Product.objects.select_related("category").annotate(
+        max_qty=Value(MAX_QUANTITY),
+        min_qty=Value(MIN_QUANTITY),
+    )
 
     if filter_by == "actives":
         products = products.filter(is_active=True)
     elif filter_by == "inactives":
         products = products.filter(is_active=False)
+
+    if category is not None:
+        products = products.filter(category=category)
+
     return products.order_by("id")
 
 
@@ -49,6 +63,7 @@ def create_product(*, user: User, **fields: dict) -> Product:
     product = Product(**fields)
     product.full_clean()
     product.save(user.id)
+    product = _add_qty_props(product)
     return product
 
 
@@ -72,4 +87,5 @@ def update_product(*, product: Product, user: User, **fields: dict) -> Product:
                     default_storage.delete(existing_image)
             product.full_clean()
             product.save(user.id, update_fields=changed_fields)
+        product = _add_qty_props(product)
         return product

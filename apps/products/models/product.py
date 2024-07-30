@@ -12,7 +12,7 @@ from django.core.validators import (
 from apps.products.models.category import Category
 from apps.products.types import IMAGE_EXTENSION
 from common.models import BaseModel
-from common.functions import cents_to_dollar
+from common.functions import cents_to_dollar, clean_spaces
 
 
 # noinspection PyUnusedLocal
@@ -85,6 +85,11 @@ class Product(BaseModel):
                 violation_error_message="Name can't be empty.",
             ),
         ]
+
+    def clean(self):
+        """Clean product fields."""
+        self.name = clean_spaces(self.name.capitalize())
+        self.description = clean_spaces(self.description.capitalize())
 
     def __str__(self) -> str:
         """Return instance name."""

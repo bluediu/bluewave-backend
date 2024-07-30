@@ -29,6 +29,18 @@ order_search_params_specs = [
     OpenApiParameter("close", description="Order close", type=bool),
 ]
 
+_order_code_params = OpenApiParameter(
+    name="order_code",
+    description="Order code.",
+    location=OpenApiParameter.PATH,
+)
+
+_table_code_params = OpenApiParameter(
+    name="table_code",
+    description="Table code.",
+    location=OpenApiParameter.PATH,
+)
+
 
 class _OrderSearchT(TypedDict):
     """An order search type."""
@@ -41,13 +53,11 @@ class _OrderSearchT(TypedDict):
 def process_order_query_params(query_params: QueryDict) -> _OrderSearchT:
     """Return serialized and validated order query parameters."""
     params: _OrderSearchT = {}
-    params_count = 0
 
     table_id = query_params.get("table_id")
     if table_id is not None:
         try:
             params["table_id"] = int(table_id)
-            params_count += 1
         except ValueError:
             raise ValidationError({"table_id": "Invalid value."})
 
@@ -56,12 +66,10 @@ def process_order_query_params(query_params: QueryDict) -> _OrderSearchT:
         if status not in OrderStatus.values:
             raise ValidationError({"status": "Invalid value."})
         params["status"] = status
-        params_count += 1
 
     close = query_params.get("close")
     if close is not None:
         params["close"] = True if close == "true" else False
-        params_count += 1
 
     return params
 
@@ -69,13 +77,14 @@ def process_order_query_params(query_params: QueryDict) -> _OrderSearchT:
 # noinspection PyUnusedLocal
 @_order_api_schema(
     summary="Get order state",
+    parameters=[_table_code_params],
     responses=OpenApiResponse(
         response=srz.OrderStateInfoSerializer,
         description="Order state successfully retrieved.",
     ),
 )
 @api_view(["GET"])
-@permission_required("tables.get_order")
+@permission_required("transactions.view_order")
 def get_order_state(request, table_code: str) -> Response:
     """Get order state information."""
     data = sv.get_order_state(table_code)
@@ -86,13 +95,14 @@ def get_order_state(request, table_code: str) -> Response:
 # noinspection PyUnusedLocal
 @_order_api_schema(
     summary="Get order count",
+    parameters=[_table_code_params],
     responses=OpenApiResponse(
         response=srz.OrderCountSerializer,
         description="Order count successfully retrieved.",
     ),
 )
 @api_view(["GET"])
-@permission_required("tables.get_order")
+@permission_required("transactions.view_order")
 def get_order_count(request, table_code: str) -> Response:
     """Get order count information."""
     data = sv.get_order_count(table_code)
@@ -110,7 +120,7 @@ def get_order_count(request, table_code: str) -> Response:
     ),
 )
 @api_view(["GET"])
-@permission_required("tables.list_table")
+@permission_required("transactions.list_order")
 def search_orders(request) -> Response:
     """Retrieve a table's orders."""
     params = process_order_query_params(request.query_params)
@@ -122,14 +132,14 @@ def search_orders(request) -> Response:
 # noinspection PyUnusedLocal
 @_order_api_schema(
     summary="List products by table order",
-    parameters=order_search_params_specs,
+    parameters=[_table_code_params],
     responses=OpenApiResponse(
         response=srz.OrderProductsInfoSerializer(many=True),
         description="Order products successfully retrieved.",
     ),
 )
 @api_view(["GET"])
-@permission_required("tables.list_table")
+@permission_required("transactions.list_order")
 def list_order_products(request, table_code: str) -> Response:
     """Retrieve products for a table order."""
     orders = sv.list_order_products(table_code)
@@ -174,6 +184,7 @@ def register_bulk_orders(request) -> Response:
 
 @_order_api_schema(
     summary="Update order",
+    parameters=[_order_code_params],
     request=srz.OrderUpdateSerializer,
     responses=empty_response_spec("Order successfully updated."),
 )
@@ -209,6 +220,7 @@ def update_order(request, order_code: str) -> Response:
 
 @_order_api_schema(
     summary="Close all orders",
+    parameters=[_table_code_params],
     request=None,
     responses=empty_response_spec("Orders successfully closed."),
 )
