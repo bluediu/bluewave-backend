@@ -1,14 +1,19 @@
+# Core
 from functools import partial
 
-from rest_framework.decorators import api_view
+# Libs
 from rest_framework.response import Response
+from rest_framework.decorators import api_view
 from rest_framework.status import HTTP_200_OK, HTTP_201_CREATED
 from drf_spectacular.utils import OpenApiParameter, OpenApiResponse, extend_schema
 
-from common import functions as fn
+# Apps
 from apps.users.services import user as sv
-from common.api import filter_parameter_spec
 from apps.users.serializers import user as srz
+
+# Global
+from common import functions as fn
+from common.api import filter_parameter_spec
 from common.decorators import permission_required
 from common.api import id_response_spec, empty_response_spec
 

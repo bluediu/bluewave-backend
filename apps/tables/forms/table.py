@@ -1,6 +1,10 @@
+# Libs
 from django import forms
 
+# Apps
 from apps.tables.models import Table
+
+# Global
 from common.form import is_active_field
 
 
@@ -29,7 +33,7 @@ class TableLoginForm(forms.Form):
 
 
 class TableUpdateForm(forms.Form):
-    """A update table form schema."""
+    """An update table form schema."""
 
     fields_from_model = forms.fields_for_model(
         Table,
@@ -39,6 +43,7 @@ class TableUpdateForm(forms.Form):
 
     def __init__(self, table_data=None, *args, **kwargs):
         """Set fields as not required."""
+
         super().__init__(*args, **kwargs)
 
         for field_name, field in self.fields_from_model.items():

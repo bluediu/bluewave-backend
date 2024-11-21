@@ -1,5 +1,7 @@
+# Libs
 from rest_framework import serializers as srz
 
+# Global
 from common.serializers import Serializer
 
 
@@ -88,5 +90,6 @@ class UserUpdateSerializer(UserCreateSerializer):
 
     def __init__(self, *args, **kwargs):
         """Override default initialization."""
+
         super().__init__(*args, **kwargs)
         self.fields["username"].required = False

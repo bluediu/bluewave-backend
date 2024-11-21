@@ -1,8 +1,11 @@
+# Core
 from typing import Any
 
-from django.contrib.auth.models import AbstractUser
+# Libs
 from django.db import models
+from django.contrib.auth.models import AbstractUser
 
+# Global
 from common.functions import clean_spaces
 
 
@@ -38,6 +41,7 @@ class User(AbstractUser):
 
     def clean(self):
         """Clean user fields."""
+
         super().clean()
 
         self.username = clean_spaces(self.username.lower())
@@ -46,6 +50,7 @@ class User(AbstractUser):
 
     def updated_fields(self, **fields: Any) -> list[str]:
         """Return a list of the changed fields."""
+
         changed_fields = []
         for field, value in fields.items():
             if getattr(self, field) != value:

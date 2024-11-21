@@ -1,12 +1,17 @@
+# Libs
 from django import forms
 
+# Apps
 from apps.products.models import Product, Category, MIN_PRICE, MAX_PRICE
+
+# Global
 from common.form import is_active_field
 from common.functions import cents_to_dollar
 
 
 def get_category_choices(all_opt: bool = False) -> list[tuple[str, str]]:
     """Return categories as choices object."""
+
     categories = (
         Category.objects.filter(is_active=True)
         .values_list("id", "name")
@@ -80,6 +85,7 @@ class ProductUpdateForm(forms.Form):
 
     def __init__(self, product_data=None, *args, **kwargs):
         """Change fields structure."""
+
         super().__init__(*args, **kwargs)
 
         for field_name, field in self.fields_from_model.items():

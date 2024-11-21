@@ -1,9 +1,12 @@
+# Libs
 from django import forms
 from django.utils.timezone import localdate
 
+# Apps
 from apps.transactions.models import PaymentType
 from apps.transactions.models import Payment
 
+# Global
 from common.validators import NumericStringValidator
 
 
@@ -40,6 +43,7 @@ class PaymentSearchForm(forms.Form):
 
     def __init__(self, *args, **kwargs):
         """Extend to customize and validate fields."""
+
         super().__init__(*args, **kwargs)
 
         # Set 'max' attribute for date fields to current local date

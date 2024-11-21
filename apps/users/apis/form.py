@@ -1,13 +1,20 @@
+# Core
 from functools import partial
 
+# Libs
 from django.forms import model_to_dict
-from rest_framework.decorators import api_view, authentication_classes
+
 from rest_framework.response import Response
 from rest_framework.status import HTTP_200_OK
+from rest_framework.decorators import api_view, authentication_classes
+
 from drf_spectacular.utils import OpenApiResponse, extend_schema
 
+# Apps
 from apps.users import forms as fr
 from apps.users.services import user as sv
+
+# Global
 from common.functions import form_to_api_schema
 
 _user_form_api_schema = partial(extend_schema, tags=["Forms"])

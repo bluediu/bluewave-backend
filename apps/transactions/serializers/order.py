@@ -1,11 +1,15 @@
+# Libs
 from django.core.validators import MinValueValidator, MaxValueValidator
+
 from rest_framework import serializers as srz
 
+# Apps
+from apps.products.models import Product
 from apps.tables.serializers.table import TableInfoSerializer
 from apps.products.serializers.product import ProductInfoSerializer
-
-from apps.products.models import Product
 from apps.transactions.models import MIN_QUANTITY, MAX_QUANTITY, OrderStatus
+
+# Global
 from common.serializers import Serializer
 
 

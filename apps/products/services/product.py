@@ -1,13 +1,16 @@
+# Core
 from typing import Literal
 
+# Libs
 from django.db import transaction
 from django.db.models import QuerySet, Value
 from django.shortcuts import get_object_or_404
 from django.core.validators import ValidationError
 from django.core.files.storage import default_storage
 
-from apps.products.models import Product
+# Apps
 from apps.users.models import User
+from apps.products.models import Product
 from apps.transactions.models import (
     MAX_QUANTITY,
     MIN_QUANTITY,
@@ -16,6 +19,7 @@ from apps.transactions.models import (
 
 def _add_qty_props(product: Product) -> Product:
     """Add quantity properties to product."""
+
     product.max_qty = MAX_QUANTITY
     product.min_qty = MIN_QUANTITY
     return product
@@ -23,6 +27,7 @@ def _add_qty_props(product: Product) -> Product:
 
 def get_product(product_id: int) -> Product:
     """Return a product."""
+
     product = get_object_or_404(Product, id=product_id)
     product = _add_qty_props(product)
     return product
@@ -34,6 +39,7 @@ def list_products(
     category: int | None = None,
 ) -> QuerySet[Product]:
     """Return a list of products."""
+
     products = Product.objects.select_related("category").annotate(
         max_qty=Value(MAX_QUANTITY),
         min_qty=Value(MIN_QUANTITY),
@@ -52,6 +58,7 @@ def list_products(
 
 def list_latest_products() -> QuerySet[Product]:
     """Return a list of 5 latest products."""
+
     fields = ["id", "name", "image", "created_at"]
     # Use `only` to return instances.
     products = Product.objects.only(*fields).order_by("-created_at")[:5]
@@ -60,6 +67,7 @@ def list_latest_products() -> QuerySet[Product]:
 
 def create_product(*, user: User, **fields: dict) -> Product:
     """Create a product."""
+
     product = Product(**fields)
     product.full_clean()
     product.save(user.id)
@@ -69,6 +77,7 @@ def create_product(*, user: User, **fields: dict) -> Product:
 
 def update_product(*, product: Product, user: User, **fields: dict) -> Product:
     """Update a product."""
+
     existing_image = product.image.name
 
     in_process_transaction = product.orders.not_closed().exists()

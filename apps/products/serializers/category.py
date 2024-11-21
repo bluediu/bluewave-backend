@@ -1,7 +1,12 @@
+# Libs
 from django.core.validators import FileExtensionValidator
+
 from rest_framework import serializers as srz
 
+# Apps
 from apps.products.types import IMAGE_EXTENSION
+
+# Global
 from common.serializers import Serializer
 
 
@@ -76,6 +81,7 @@ class CategoryUpdateSerializer(CategoryCreateSerializer):
 
     def __init__(self, *args, **kwargs):
         """Extend to make fields not required."""
+
         super().__init__(*args, **kwargs)
         for field in self.fields:
             self.fields[field].required = False

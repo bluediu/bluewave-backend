@@ -1,6 +1,10 @@
+# Libs
 from django import forms
 
+# Apps
 from apps.users.models import User
+
+# Global
 from common.form import is_active_field
 
 

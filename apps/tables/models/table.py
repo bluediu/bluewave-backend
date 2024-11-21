@@ -1,6 +1,8 @@
+# Libs
 from django.db import models
 from django.core.exceptions import ValidationError
 
+# Global
 from common.models import BaseModel
 
 CODE_LENGTH = 4
@@ -46,6 +48,7 @@ class Table(BaseModel):
 
     def __str__(self) -> str:
         """Return a string description."""
+
         return self.code
 
     def clean(self) -> None:

@@ -1,6 +1,10 @@
+# Libs
 from rest_framework import serializers as srz
 
+# Apps
 from apps.transactions.models import PaymentType
+
+# Global
 from common.serializers import Serializer
 
 

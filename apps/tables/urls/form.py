@@ -1,5 +1,7 @@
+# Libs
 from django.urls import path
 
+# Apps
 import apps.tables.apis.form as api
 
 tables_form_patterns = [
