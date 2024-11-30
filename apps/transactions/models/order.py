@@ -1,3 +1,4 @@
+# Libs
 from django.db import models
 from django.core.validators import RegexValidator
 from django.core.validators import (
@@ -5,9 +6,11 @@ from django.core.validators import (
     MaxValueValidator,
 )
 
+# Apps
 from apps.tables.models import Table
 from apps.products.models import Product
 
+# Global
 from common.models import BaseModel
 
 
@@ -92,7 +95,6 @@ class Order(BaseModel):
             ("change_order", "Update order"),
         ]
         constraints = [
-            # TODO: add constrain based on status
             models.CheckConstraint(
                 name="%(app_label)s_%(class)s_code_valid",
                 check=models.Q(code__regex=f"^[0-9A-Za-z]{{{CODE_LENGTH}}}$"),
@@ -114,14 +116,17 @@ class Order(BaseModel):
     @property
     def is_pending(self):
         """Return True if the order is pending."""
+
         return self.status == OrderStatus.PENDING
 
     @property
     def is_delivered(self):
         """Return True if the order is delivered"""
+
         return self.status == OrderStatus.DELIVERED
 
     @property
     def is_canceled(self):
         """Return True if the order is canceled."""
+
         return self.status == OrderStatus.CANCELED

@@ -1,5 +1,7 @@
+# Libs
 from django.urls import path
 
+# Apps
 import apps.products.apis.form as api
 
 products_form_patterns = [

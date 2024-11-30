@@ -1,18 +1,22 @@
+# Core
 from typing import TypedDict, Required
 
+# Libs
 from django.db import transaction
 from django.utils.timezone import now
 from django.db.models.functions import Concat
-from django.db.models import QuerySet, F, Sum, Value, CharField
 from django.shortcuts import get_object_or_404
 from django.core.validators import ValidationError
 from django.core.exceptions import ObjectDoesNotExist
+from django.db.models import QuerySet, F, Sum, Value, CharField
 
+# Apps
 from apps.users.models import User
 from apps.tables.models import Table
 from apps.tables.services.table import get_table_by_code
 from apps.transactions.models import Order, OrderStatus, Payment, PaymentStatus
 
+# Global
 from common import functions as fn
 
 
@@ -25,6 +29,7 @@ class _PaymentRegisterT(TypedDict):
 
 def pending_payment_exists(*, table: Table) -> bool:
     """Search for pending payment for a table."""
+
     pending_payment = Payment.objects.filter(
         table=table,
         status=PaymentStatus.PENDING,
@@ -35,6 +40,7 @@ def pending_payment_exists(*, table: Table) -> bool:
 
 def _validate_payment_context(user: User, fields: _PaymentRegisterT) -> None:
     """Validate a payment context consistency."""
+
     inactive_msg = "Must be active."
     if not user.is_active:
         raise ValidationError({"user": inactive_msg})
@@ -57,6 +63,7 @@ def _validate_payment_context(user: User, fields: _PaymentRegisterT) -> None:
 
 def get_payment(table_code: str) -> Payment | None:
     """Return a payment."""
+
     try:
         payment = Payment.objects.get(
             table__code=table_code,
@@ -71,6 +78,7 @@ def get_payment(table_code: str) -> Payment | None:
 
 def list_orders_by_payment(code: str) -> QuerySet[Order]:
     """Return a list of orders by payment."""
+
     payment = get_object_or_404(Payment, pk=code)
     orders = (
         payment.orders.filter(is_closed=True)
@@ -97,6 +105,7 @@ def search_payments(
     until: str = None,
 ) -> QuerySet[Payment]:
     """Return a list of payments."""
+
     payments = Payment.objects.filter(status=PaymentStatus.PAID)
 
     if code:
@@ -117,6 +126,7 @@ def search_payments(
 
 def register_payment(*, user: User, fields: _PaymentRegisterT) -> None:
     """Register a payment."""
+
     _validate_payment_context(user, fields)
 
     with transaction.atomic():
@@ -145,6 +155,7 @@ def register_payment(*, user: User, fields: _PaymentRegisterT) -> None:
 
 def close_payment(*, user: User, table: Table) -> None:
     """Close a payment."""
+
     with transaction.atomic():
         # Change payment status.
         pending_payment = table.payments.get(status=PaymentStatus.PENDING)

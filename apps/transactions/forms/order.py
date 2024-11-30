@@ -1,12 +1,15 @@
-from django.db.models import Q
+# Libs
 from django import forms
+from django.db.models import Q
 
+# Apps
 from apps.transactions.models import Order, MIN_QUANTITY, MAX_QUANTITY
 from apps.products.models import Product
 
 
 def get_products_choices(table_code) -> list[tuple[str, str]]:
     """Return available products as choices object."""
+
     # Search for products already included for an ordered table.
     not_available = (
         Order.objects.not_closed()
@@ -39,6 +42,7 @@ class OrderRegisterForm(forms.Form):
 
     def __init__(self, table_code: str, *args, **kwargs):
         """Pre-fill products choices."""
+
         super().__init__(*args, **kwargs)
 
         self.fields_from_model["product"].widget.choices = get_products_choices(

@@ -1,18 +1,24 @@
+# Core
 from pathlib import Path
 
-from django.utils.crypto import get_random_string
-from django.utils.timezone import now
+# Libs
 from django.db import models
+from django.utils.timezone import now
+from django.utils.crypto import get_random_string
 from django.core.validators import FileExtensionValidator
 
+# Apps
+from apps.products.types import IMAGE_EXTENSION
+
+# Global
 from common.models import BaseModel
 from common.functions import clean_spaces
-from apps.products.types import IMAGE_EXTENSION
 
 
 # noinspection PyUnusedLocal
 def _image_file_path(instance, filename) -> str:
     """Return a standard image path format."""
+
     ext = Path(filename).suffix
     filename = f"{now().strftime('%Y%m%d%H%M%S')}_{get_random_string(4)}{ext}"
     return f"categories/{filename}"
@@ -60,4 +66,5 @@ class Category(BaseModel):
 
     def clean(self):
         """Clean category fields."""
+
         self.name = clean_spaces(self.name.capitalize())

@@ -1,10 +1,11 @@
+# Core
 import envtoml
 from typing import Literal
 
+# Libs
 from django.contrib.auth import authenticate
 from django.shortcuts import get_object_or_404
 from django.core.validators import ValidationError
-from rest_framework_simplejwt.tokens import AccessToken
 from django.db.models import (
     Q,
     Case,
@@ -16,18 +17,23 @@ from django.db.models import (
     BooleanField,
 )
 
+from rest_framework_simplejwt.tokens import AccessToken
+
+# Apps
 from apps.tables.models import Table
-from apps.transactions.models import OrderStatus, Order, Payment, PaymentStatus
 from apps.users.models import User
+from apps.transactions.models import OrderStatus, Order, Payment, PaymentStatus
 
 
 def get_table(table_id: int) -> Table:
     """Return a table."""
+
     return get_object_or_404(Table, id=table_id)
 
 
 def get_table_by_code(table_code: str) -> Table:
     """Return a table."""
+
     return get_object_or_404(Table, code=table_code)
 
 
@@ -55,6 +61,7 @@ def list_tables(
     filter_by: Literal["all", "actives", "inactives"],
 ) -> QuerySet[Table]:
     """Return a list of tables."""
+
     tables = Table.objects
 
     if filter_by == "actives":
@@ -72,6 +79,7 @@ def list_table_order_statuses() -> dict:
     Counts the orders for each table and checks if any orders
     have been delivered, indicating that the table is busy.
     """
+
     tables = (
         Table.objects.values("id", "code")
         .annotate(
@@ -130,6 +138,7 @@ def list_table_order_statuses() -> dict:
 
 def create_table(*, user: User, **fields: dict) -> Table:
     """Create a table."""
+
     table = Table(**fields)
     table.full_clean()
     table.save(user.id)
@@ -138,6 +147,7 @@ def create_table(*, user: User, **fields: dict) -> Table:
 
 def update_table(*, table: Table, user: User, **fields: dict) -> Table:
     """Update a table."""
+
     processing_orders = table.orders.not_closed().exists()
     if processing_orders:
         msg = "This table can't be edited because it is currently processing orders."

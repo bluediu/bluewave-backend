@@ -1,13 +1,18 @@
+# Libs
 from django.core.validators import (
     MinValueValidator,
     MaxValueValidator,
     FileExtensionValidator,
 )
+
 from rest_framework import serializers as srz
 
-from apps.products.serializers.category import CategoryInfoSerializer
+# Apps
 from apps.products.types import IMAGE_EXTENSION
 from apps.products.models import MIN_PRICE, MAX_PRICE
+from apps.products.serializers.category import CategoryInfoSerializer
+
+# Global
 from common.serializers import Serializer
 
 
@@ -97,6 +102,7 @@ class ProductUpdateSerializer(ProductCreateSerializer):
 
     def __init__(self, *args, **kwargs):
         """Extend to make fields not required."""
+
         super().__init__(*args, **kwargs)
         for field in self.fields:
             self.fields[field].required = False

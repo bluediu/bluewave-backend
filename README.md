@@ -1,4 +1,4 @@
-# Blue Wave [Backend]
+# Blue Wave 🌊 [Backend]
 
 ## Overview
 
@@ -33,4 +33,8 @@ To get the backend server running:
     pip install -r requirements.txt
     python manage.py runserver
     ```
+   
+### Frontend Project:
+
+https://github.com/bluediu/bluewave
    

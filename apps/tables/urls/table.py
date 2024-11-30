@@ -1,5 +1,7 @@
+# Libs
 from django.urls import include, path
 
+# Apps
 import apps.tables.apis.table as api
 
 api_patterns = [

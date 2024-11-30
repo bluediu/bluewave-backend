@@ -1,15 +1,22 @@
+# Core
 from functools import partial
 
-from rest_framework.decorators import api_view
+# Libs
 from rest_framework.response import Response
+from rest_framework.decorators import api_view
 from rest_framework.status import HTTP_200_OK, HTTP_201_CREATED
+
 from drf_spectacular.utils import OpenApiResponse, extend_schema, OpenApiParameter
 
+# Apps
+from apps.products.services import category as sv
+from apps.products.serializers import category as srz
+
+# Global
 from common import functions as fn
 from common.api import filter_parameter_spec
 from common.decorators import permission_required
-from apps.products.services import category as sv
-from apps.products.serializers import category as srz
+
 
 _category_api_schema = partial(extend_schema, tags=["Categories"])
 
@@ -35,6 +42,7 @@ _category_id_params = OpenApiParameter(
 @permission_required("products.view_category")
 def get_category(request, category_id: int) -> Response:
     """Return a category's information."""
+
     category = sv.get_category(category_id)
     output = srz.CategoryInfoSerializer(category)
     return Response(data=output.data, status=HTTP_200_OK)
@@ -53,6 +61,7 @@ def get_category(request, category_id: int) -> Response:
 @permission_required("products.list_category")
 def list_categories(request) -> Response:
     """Return a list of categories."""
+
     filter_by = fn.validate_filter_query_param(request.query_params)
     output = srz.CategoryInfoSerializer(
         sv.list_categories(filter_by=filter_by),
@@ -74,6 +83,7 @@ def list_categories(request) -> Response:
 @permission_required("products.list_category")
 def list_product_by_category(request, category_id: int) -> Response:
     """Return a list of products by category."""
+
     filter_by = fn.validate_filter_query_param(request.query_params)
     output = srz.CategoryProductsInfoSerializer(
         sv.get_products_by_category(category_id, filter_by),
@@ -94,6 +104,7 @@ def list_product_by_category(request, category_id: int) -> Response:
 @permission_required("products.create_category")
 def create_category(request) -> Response:
     """Create a new category."""
+
     payload = srz.CategoryCreateSerializer(data=request.data)
     payload.check_data()
     data = payload.validated_data
@@ -115,6 +126,7 @@ def create_category(request) -> Response:
 @permission_required("products.change_category")
 def update_category(request, category_id: int) -> Response:
     """Update a category."""
+
     payload = srz.CategoryUpdateSerializer(data=request.data)
     payload.check_data()
     data = payload.validated_data

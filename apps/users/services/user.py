@@ -1,13 +1,16 @@
+# Core
 from typing import Literal
 
+# Libs
 from django.db import transaction
 from django.db.models import QuerySet
 from django.shortcuts import get_object_or_404
 from django.core.exceptions import ValidationError
 from django.contrib.auth.hashers import make_password
-
-from apps.users.models.user import User
 from django.contrib.auth.models import Permission, Group
+
+# Apps
+from apps.users.models.user import User
 
 DEFAULT_USER_PERMISSION = "view_user"
 DEFAULT_GROUPS = ["Orders", "Payments", "Tables"]
@@ -15,6 +18,7 @@ DEFAULT_GROUPS = ["Orders", "Payments", "Tables"]
 
 def _check_password_match(fields: dict) -> None:
     """Check passwords' integrity."""
+
     if fields["password"] != fields["repeat_password"]:
         raise ValidationError({"password": "Password does not match"})
 
@@ -23,6 +27,7 @@ def _check_password_match(fields: dict) -> None:
 
 def get_user(user_id: int) -> User:
     """Return a user."""
+
     return get_object_or_404(User, id=user_id)
 
 
@@ -32,6 +37,7 @@ def get_users(
     filter_by: Literal["all", "actives", "inactives"],
 ) -> QuerySet[User]:
     """Return the users."""
+
     users = User.objects.values(
         "id",
         "username",
@@ -58,6 +64,7 @@ def get_users(
 
 def create_user(*, request_user: User, **fields: dict) -> User:
     """Create a user."""
+
     _check_password_match(fields)
     # Encrypt password using algorithm `pbkdf2_sha256`.
     fields["password"] = make_password(fields["password"])
@@ -81,6 +88,7 @@ def create_user(*, request_user: User, **fields: dict) -> User:
 
 def update_user(*, user: User, request_user: User, **fields: dict) -> None:
     """Update a user."""
+
     if not request_user.is_superuser and user.is_superuser:
         raise ValidationError("Only a superuser can update another superuser.")
     changed_fields = user.updated_fields(**fields)

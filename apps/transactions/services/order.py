@@ -1,16 +1,31 @@
+# Core
 from typing import List, TypedDict, Required, NotRequired
 
+# Libs
 from django.db import transaction
 from django.utils.timezone import now
 from django.db.models.functions import Concat
 from django.shortcuts import get_object_or_404
 from django.core.validators import ValidationError
-from django.db.models import CharField, QuerySet, F, Case, When, Value, Q, Sum, Count
 
+from django.db.models import (
+    Case,
+    CharField,
+    Count,
+    F,
+    Q,
+    QuerySet,
+    Sum,
+    Value,
+    When,
+)
 
+# Apps
 from apps.users.models import User
 from apps.tables.models import Table
 from apps.products.models import Product
+from apps.transactions.services.payment import pending_payment_exists
+
 from apps.transactions.models import (
     Order,
     OrderStatus,
@@ -18,7 +33,7 @@ from apps.transactions.models import (
     MIN_QUANTITY,
 )
 
-from apps.transactions.services.payment import pending_payment_exists
+# Global
 from common.functions import generate_random_code
 
 
@@ -46,6 +61,7 @@ class _OrderUpdateT(TypedDict):
 
 def _validate_order_context(user: User, fields: _OrderRegisterT) -> None:
     """Validate an order context consistency."""
+
     inactive_msg = "Must be active."
     if not user.is_active:
         raise ValidationError({"user": inactive_msg})
@@ -78,11 +94,13 @@ def _validate_order_context(user: User, fields: _OrderRegisterT) -> None:
 
 def get_order(order_code: str) -> Order:
     """Return an order."""
+
     return get_object_or_404(Order, code=order_code)
 
 
 def get_order_state(table_code: str) -> dict:
     """Get order state info."""
+
     info = (
         Order.objects.not_closed()
         .filter(Q(table__code=table_code) & ~Q(status=OrderStatus.CANCELED))
@@ -98,6 +116,7 @@ def get_order_state(table_code: str) -> dict:
 
 def get_order_count(table_code: str) -> dict:
     """Get order count."""
+
     count = Order.objects.not_closed().filter(table__code=table_code).count()
     return {"count": count}
 
@@ -153,6 +172,7 @@ def search_orders(
 
 def register_order(*, user: User, fields: _OrderRegisterT) -> None:
     """Register an order."""
+
     _validate_order_context(user, fields)
 
     order = Order(code=generate_random_code(), **fields)
@@ -163,6 +183,7 @@ def register_order(*, user: User, fields: _OrderRegisterT) -> None:
 @transaction.atomic
 def register_bulk_orders(*, user: User, fields: _BulkOrderRegisterT) -> None:
     """Register bulk orders."""
+
     orders: List[Order] = []
 
     for item in fields["products"]:
@@ -196,6 +217,7 @@ def register_bulk_orders(*, user: User, fields: _BulkOrderRegisterT) -> None:
 
 def update_order(*, order: Order, user: User, **fields: _OrderUpdateT) -> Order:
     """Update an order."""
+
     previous_qty = order.quantity
     previous_status = order.status
     changed_fields = order.update_fields(**fields)
@@ -232,6 +254,7 @@ def update_order(*, order: Order, user: User, **fields: _OrderUpdateT) -> Order:
 
 def close_orders_bulk(*, user: User, table: Table) -> None:
     """Close an orders."""
+
     orders = table.orders
 
     all_orders_canceled = (

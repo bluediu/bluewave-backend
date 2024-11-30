@@ -1,13 +1,20 @@
+# Core
 from functools import partial
 
+# Libs
 from django.forms import model_to_dict
-from rest_framework.decorators import api_view, authentication_classes
-from rest_framework.response import Response
+
 from rest_framework.status import HTTP_200_OK
+from rest_framework.response import Response
+from rest_framework.decorators import api_view, authentication_classes
+
 from drf_spectacular.utils import OpenApiResponse, extend_schema
 
+# Apps
 from apps.tables import forms as fr
 from apps.tables.services.table import get_table
+
+# Global
 from common.functions import form_to_api_schema
 
 
@@ -40,6 +47,8 @@ def get_create_table_form(request) -> Response:
 @authentication_classes(None)
 @api_view(["GET"])
 def get_login_table_form(request) -> Response:
+    """Return a login form schema."""
+
     form = form_to_api_schema(form=fr.TableLoginForm())
     return Response(data=form, status=HTTP_200_OK)
 
@@ -55,6 +64,7 @@ def get_login_table_form(request) -> Response:
 @api_view(["GET"])
 def get_update_table_form(request, table_id: int) -> Response:
     """Return a table update form schema."""
+
     category_data = model_to_dict(get_table(table_id))
     form_schema = form_to_api_schema(form=fr.TableUpdateForm(category_data))
     return Response(data=form_schema, status=HTTP_200_OK)

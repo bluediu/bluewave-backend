@@ -1,18 +1,25 @@
+# Core
 from functools import partial
 from typing import NotRequired, TypedDict
 
+# Libs
 from django.http import QueryDict
+
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from rest_framework.status import HTTP_200_OK, HTTP_201_CREATED
+
 from drf_spectacular.utils import OpenApiResponse, extend_schema, OpenApiParameter
 
-from common import functions as fn
-from common.api import filter_parameter_spec
+# Apps
 from apps.products.services import product as sv
-from common.decorators import permission_required
 from apps.products.serializers import product as srz
 from apps.products.services.category import get_category
+
+# Global
+from common import functions as fn
+from common.api import filter_parameter_spec
+from common.decorators import permission_required
 
 
 _product_api_schema = partial(extend_schema, tags=["Products"])
@@ -34,6 +41,7 @@ class _ProductSearchT(TypedDict):
 
 def process_product_query_params(query_params: QueryDict) -> _ProductSearchT:
     """Return serialized and validated query parameters."""
+
     params: _ProductSearchT = {}
 
     filter_by = fn.validate_filter_query_param(query_params)
@@ -60,6 +68,7 @@ def process_product_query_params(query_params: QueryDict) -> _ProductSearchT:
 @permission_required("products.view_product")
 def get_product(request, product_id: int) -> Response:
     """Return a product's information."""
+
     product = sv.get_product(product_id)
     output = srz.ProductInfoSerializer(product)
     return Response(data=output.data, status=HTTP_200_OK)
@@ -85,6 +94,7 @@ def get_product(request, product_id: int) -> Response:
 @permission_required("product.list_product")
 def list_products(request) -> Response:
     """Return a list of products."""
+
     params = process_product_query_params(request.query_params)
     output = srz.ProductInfoSerializer(
         sv.list_products(**params),
@@ -105,6 +115,7 @@ def list_products(request) -> Response:
 @permission_required("product.list_product")
 def list_latest_products(request) -> Response:
     """Return a list of five latest products."""
+
     output = srz.ProductLatestInfoSerializer(
         sv.list_latest_products(),
         many=True,
@@ -124,6 +135,7 @@ def list_latest_products(request) -> Response:
 @permission_required("product.create_product")
 def create_product(request) -> Response:
     """Create a new product."""
+
     payload = srz.ProductCreateSerializer(data=request.data)
     payload.check_data()
     data = payload.validated_data
@@ -146,6 +158,7 @@ def create_product(request) -> Response:
 @permission_required("product.change_product")
 def update_product(request, product_id: int) -> Response:
     """Update a product."""
+
     payload = srz.ProductUpdateSerializer(data=request.data)
     payload.check_data()
     data = payload.validated_data

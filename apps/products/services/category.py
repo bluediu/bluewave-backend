@@ -1,18 +1,22 @@
+# Core
 from typing import Literal
 
+# Libs
 from django.db import transaction
-from django.db.models import QuerySet, F, Value
 from django.shortcuts import get_object_or_404
+from django.db.models import QuerySet, F, Value
 from django.core.validators import ValidationError
 from django.core.files.storage import default_storage
 
+# Apps
 from apps.users.models import User
-from apps.transactions.models import Order, MAX_QUANTITY, MIN_QUANTITY
 from apps.products.models import Category, Product
+from apps.transactions.models import Order, MAX_QUANTITY, MIN_QUANTITY
 
 
 def get_category(category_id: int) -> Category:
     """Return a category."""
+
     return get_object_or_404(Category, id=category_id)
 
 
@@ -21,6 +25,7 @@ def get_products_by_category(
     filter_by: Literal["all", "actives", "inactives"],
 ) -> QuerySet:
     """Return a queryset of products."""
+
     products = Product.objects.filter(category_id=category_id).annotate(
         category_name=F("category__name"),
         max_qty=Value(MAX_QUANTITY),
@@ -39,6 +44,7 @@ def list_categories(
     *, filter_by: Literal["all", "actives", "inactives"]
 ) -> QuerySet[Category]:
     """Return a list of categories."""
+
     categories = Category.objects
 
     if filter_by == "actives":
@@ -51,6 +57,7 @@ def list_categories(
 
 def create_category(*, user: User, **fields: dict) -> Category:
     """Create a category."""
+
     category = Category(**fields)
     category.full_clean()
     category.save(user.id)
@@ -59,6 +66,7 @@ def create_category(*, user: User, **fields: dict) -> Category:
 
 def update_category(*, category: Category, user: User, **fields: dict) -> Category:
     """Update a category."""
+
     in_process_transaction = Order.objects.not_closed().filter(
         product_id__in=category.products.values_list("id", flat=True),
     )

@@ -1,6 +1,10 @@
+# Libs
 from django import forms
 
+# Apps
 from apps.products.models import Category
+
+# Global
 from common.form import is_active_field
 
 
@@ -24,6 +28,7 @@ class CategoryUpdateForm(forms.Form):
 
     def __init__(self, category_data=None, *args, **kwargs):
         """Set fields as not required."""
+
         super().__init__(*args, **kwargs)
 
         for field_name, field in self.fields_from_model.items():

@@ -1,8 +1,12 @@
+# Libs
 from django.db import models
 from django.core.validators import RegexValidator
 from django.core.validators import MinValueValidator
 
+# Apps
 from apps.tables.models import Table
+
+# Global
 from common.models import BaseModel
 
 

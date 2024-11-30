@@ -1,6 +1,8 @@
+# Core
 from functools import partial
 from typing import NotRequired, TypedDict
 
+# Libs
 from django.http import QueryDict
 from django.utils.timezone import now
 from django.core.validators import ValidationError
@@ -10,11 +12,13 @@ from rest_framework.decorators import api_view
 from rest_framework.status import HTTP_201_CREATED, HTTP_200_OK
 from drf_spectacular.utils import OpenApiResponse, OpenApiParameter, extend_schema
 
+# Apps
 from apps.transactions.services import payment as sv
 from apps.transactions.serializers import payment as srz
 from apps.tables.services.table import get_table_by_code
 from apps.transactions.models.payment import PaymentType
 
+# Global
 from common import functions as fn
 from common.api import empty_response_spec
 from common.decorators import permission_required
@@ -57,6 +61,7 @@ class _PaymentSearchT(TypedDict):
 
 def process_payment_query_params(query_params: QueryDict) -> _PaymentSearchT:
     """Return serialized and validated order query parameters."""
+
     params: _PaymentSearchT = {}
 
     code = query_params.get("code")
@@ -108,6 +113,7 @@ def process_payment_query_params(query_params: QueryDict) -> _PaymentSearchT:
 @permission_required("transaction.list_payment")
 def list_orders_by_payments(request, code: str) -> Response:
     """Retrieve orders for a payment."""
+
     orders = sv.list_orders_by_payment(code)
     output = srz.PaymentOrdersInfoSerializer(orders, many=True)
     return Response(data=output.data, status=HTTP_200_OK)
@@ -130,6 +136,7 @@ def get_payment(request, table_code: str) -> Response:
 
     It returns an empty response if no payment is found.
     """
+
     payment = sv.get_payment(table_code)
     output = None
     if payment:
@@ -150,6 +157,7 @@ def get_payment(request, table_code: str) -> Response:
 @permission_required("transactions.list_payment")
 def list_payments_history(request) -> Response:
     """Retrieve a list of payments."""
+
     params = process_payment_query_params(request.query_params)
     payments = sv.search_payments(**params)
     output = srz.PaymentInfoSerializer(payments, many=True)
@@ -165,6 +173,7 @@ def list_payments_history(request) -> Response:
 @permission_required("transactions.create_payment")
 def register_payment(request) -> Response:
     """Register a payment."""
+
     payload = srz.PaymentRegisterSerializer(data=request.data)
     payload.check_data()
     data = payload.validated_data
@@ -188,6 +197,7 @@ def close_payment(request, table_code: str) -> Response:
     This action involves changing the payment status to 'PAID' and setting
     the 'is_closed' status to True for all orders associated with this payment.
     """
+
     table = get_table_by_code(table_code=table_code)
     sv.close_payment(user=request.user, table=table)
     return Response(data={"ok": True}, status=HTTP_200_OK)

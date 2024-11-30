@@ -1,5 +1,7 @@
+# Libs
 from django.urls import include, path
 
+# Apps
 import apps.users.apis.user as api
 
 users_patterns = [

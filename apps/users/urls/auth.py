@@ -1,5 +1,7 @@
+# Libs
 from django.urls import path, include
 
+# Apps
 from apps.users.apis import auth
 
 auth_patterns = [

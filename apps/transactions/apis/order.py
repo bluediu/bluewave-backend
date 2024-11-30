@@ -1,19 +1,25 @@
+# Core
 from functools import partial
 from typing import NotRequired, TypedDict
 
+# Libs
 from django.http import QueryDict
 from django.core.validators import ValidationError
-from rest_framework.decorators import api_view
+
 from rest_framework.response import Response
+from rest_framework.decorators import api_view
 from rest_framework.status import HTTP_200_OK, HTTP_201_CREATED
+
 from drf_spectacular.utils import OpenApiResponse, OpenApiParameter, extend_schema
 
+# Apps
 from apps.transactions.models import OrderStatus
 from apps.transactions.services import order as sv
 from apps.transactions.serializers import order as srz
-from apps.tables.services.table import get_table_by_code
 from apps.products.services.product import get_product
+from apps.tables.services.table import get_table_by_code
 
+# Global
 from common.api import empty_response_spec
 from common.decorators import permission_required
 
@@ -52,6 +58,7 @@ class _OrderSearchT(TypedDict):
 
 def process_order_query_params(query_params: QueryDict) -> _OrderSearchT:
     """Return serialized and validated order query parameters."""
+
     params: _OrderSearchT = {}
 
     table_id = query_params.get("table_id")
@@ -87,6 +94,7 @@ def process_order_query_params(query_params: QueryDict) -> _OrderSearchT:
 @permission_required("transactions.view_order")
 def get_order_state(request, table_code: str) -> Response:
     """Get order state information."""
+
     data = sv.get_order_state(table_code)
     output = srz.OrderStateInfoSerializer(data)
     return Response(data=output.data, status=HTTP_200_OK)
@@ -105,6 +113,7 @@ def get_order_state(request, table_code: str) -> Response:
 @permission_required("transactions.view_order")
 def get_order_count(request, table_code: str) -> Response:
     """Get order count information."""
+
     data = sv.get_order_count(table_code)
     output = srz.OrderCountSerializer(data)
     return Response(data=output.data, status=HTTP_200_OK)
@@ -123,6 +132,7 @@ def get_order_count(request, table_code: str) -> Response:
 @permission_required("transactions.list_order")
 def search_orders(request) -> Response:
     """Retrieve a table's orders."""
+
     params = process_order_query_params(request.query_params)
     orders = sv.search_orders(**params)
     output = srz.OrderInfoSerializer(orders, many=True)
@@ -142,6 +152,7 @@ def search_orders(request) -> Response:
 @permission_required("transactions.list_order")
 def list_order_products(request, table_code: str) -> Response:
     """Retrieve products for a table order."""
+
     orders = sv.list_order_products(table_code)
     output = srz.OrderProductsInfoSerializer(orders, many=True)
     return Response(data=output.data, status=HTTP_200_OK)
@@ -155,7 +166,8 @@ def list_order_products(request, table_code: str) -> Response:
 @api_view(["POST"])
 @permission_required("transactions.create_order")
 def register_order(request) -> Response:
-    """Register a new order/."""
+    """Register a new order."""
+
     payload = srz.OrderRegisterSerializer(data=request.data)
     payload.check_data()
     data = payload.validated_data
@@ -174,6 +186,7 @@ def register_order(request) -> Response:
 @permission_required("transactions.create_order")
 def register_bulk_orders(request) -> Response:
     """Register bulk orders/transactions."""
+
     payload = srz.OrderBulkRegisterSerializer(data=request.data)
     payload.check_data()
     data = payload.validated_data
@@ -207,6 +220,7 @@ def update_order(request, order_code: str) -> Response:
         If the quantity is increased, the order status shifts to "Pending" to
         reflect additional products awaiting delivery.
     """
+
     payload = srz.OrderUpdateSerializer(data=request.data)
     payload.check_data()
     data = payload.validated_data
@@ -233,6 +247,7 @@ def close_orders(request, table_code: str) -> Response:
     NOTE: This action is only available for tables that have all their orders
     `canceled` for some reason.
     """
+
     table = get_table_by_code(table_code=table_code)
     sv.close_orders_bulk(user=request.user, table=table)
     return Response(status=HTTP_200_OK)

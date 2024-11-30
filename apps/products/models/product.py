@@ -1,16 +1,21 @@
+# Core
 from pathlib import Path
 
-from django.utils.crypto import get_random_string
-from django.utils.timezone import now
+# Libs
 from django.db import models
+from django.utils.timezone import now
+from django.utils.crypto import get_random_string
 from django.core.validators import (
     FileExtensionValidator,
     MinValueValidator,
     MaxValueValidator,
 )
 
+# Apps
 from apps.products.models.category import Category
 from apps.products.types import IMAGE_EXTENSION
+
+# Global
 from common.models import BaseModel
 from common.functions import cents_to_dollar, clean_spaces
 
@@ -18,6 +23,7 @@ from common.functions import cents_to_dollar, clean_spaces
 # noinspection PyUnusedLocal
 def _image_file_path(instance, filename) -> str:
     """Return a standard image path format."""
+
     ext = Path(filename).suffix
     filename = f"{now().strftime('%Y%m%d%H%M%S')}_{get_random_string(4)}{ext}"
     return f"products/{filename}"
@@ -88,9 +94,11 @@ class Product(BaseModel):
 
     def clean(self):
         """Clean product fields."""
+
         self.name = clean_spaces(self.name.capitalize())
         self.description = clean_spaces(self.description.capitalize())
 
     def __str__(self) -> str:
         """Return instance name."""
+
         return self.name

@@ -1,5 +1,7 @@
+# Libs
 from django.urls import include, path
 
+# Apps
 import apps.products.apis.category as api
 
 api_patterns = [
